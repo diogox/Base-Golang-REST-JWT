@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/diogox/Calendoer/server/cmd/app"
 	"github.com/diogox/Calendoer/server/pkg/routes"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 	echoLog "github.com/neko-neko/echo-logrus/log"
-	"github.com/urfave/cli"
+	"github.com/spf13/cobra"
+	"os"
 )
 
 func main() {
@@ -19,11 +18,8 @@ func main() {
 	logger := echoLog.Logger()
 	logger.SetLevel(log.DEBUG)
 
-	// Create app
-	serverApp := app.NewCli("Calendoer")
-
-	// Run it
-	err := serverApp.Run(func(c *cli.Context) error {
+	// Run app
+	app.Cmd.RunE = func(cmd *cobra.Command, args []string) error {
 
 		e := echo.New()
 		e.Logger = logger
@@ -48,14 +44,13 @@ func main() {
 		)
 
 		// Routes
-		routes.SetupRoutes(e, serverApp.Opts)
+		routes.SetupRoutes(e, app.JWTSecret)
 
-		return e.Start(serverApp.Opts.Port)
-	})
+		return e.Start( fmt.Sprintf(":%s", app.Port) )
+	}
 
-	// Something went wrong!
-	if err != nil {
-		logger.Fatal(err)
+	if err := app.Cmd.Execute(); err != nil {
+		log.Fatal(err)
 		os.Exit(1)
 	}
 }

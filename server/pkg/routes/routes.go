@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/Calendoer/server/cmd/app"
 	"github.com/diogox/Calendoer/server/pkg/models/auth"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -13,9 +12,9 @@ import (
 
 var JWTSecret []byte
 
-func SetupRoutes(e *echo.Echo, opts *app.AppOptions) {
+func SetupRoutes(e *echo.Echo, jwtSecret string) {
 
-	JWTSecret = []byte(opts.JWTSecret)
+	JWTSecret = []byte(jwtSecret)
 
 	// Serve website
 	e.File("/*", "../web/index.html")
