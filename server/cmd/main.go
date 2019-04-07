@@ -1,16 +1,23 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/diogox/Calendoer/server/cmd/app"
 	"github.com/diogox/Calendoer/server/pkg/routes"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
+	echoLog "github.com/neko-neko/echo-logrus/log"
 	"github.com/urfave/cli"
-	"log"
-	"os"
 )
 
 func main() {
+
+	// Instantiate logger
+	logger := echoLog.Logger()
+	logger.SetLevel(log.DEBUG)
 
 	// Create app
 	serverApp := app.NewCli("Calendoer")
@@ -19,9 +26,23 @@ func main() {
 	err := serverApp.Run(func(c *cli.Context) error {
 
 		e := echo.New()
+		e.Logger = logger
+
+		// TODO: Cleaner logs
+		loggerMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				req := c.Request()
+				res := c.Response()
+
+				logger.Debug(fmt.Sprintf("[%s] %s - (%d)", req.Method, c.Path(), res.Status))
+				return next(c)
+			}
+		}
 
 		// Middleware
-		e.Use(middleware.Logger(),
+		e.Use(
+			//middleware.Logger(),
+			loggerMiddleware,
 			middleware.Recover(),
 			//middleware.HTTPSRedirect(),
 		)
@@ -34,7 +55,7 @@ func main() {
 
 	// Something went wrong!
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		os.Exit(1)
 	}
 }

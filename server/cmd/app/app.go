@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/urfave/cli"
 	"os"
+
+	"github.com/urfave/cli"
 )
 
 func NewCli(name string) *CliApp {
@@ -15,13 +16,13 @@ func NewCli(name string) *CliApp {
 	opts.AddFlags(app)
 
 	return &CliApp{
-		App: app,
+		App:  app,
 		Opts: opts,
 	}
 }
 
-type CliApp struct{
-	App *cli.App
+type CliApp struct {
+	App  *cli.App
 	Opts *AppOptions
 }
 

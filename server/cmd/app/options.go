@@ -1,6 +1,8 @@
 package app
 
-import "github.com/urfave/cli"
+import (
+	"github.com/urfave/cli"
+)
 
 const (
 	Port      = "PORT"
