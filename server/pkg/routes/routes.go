@@ -1,95 +1,78 @@
 package routes
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/Calendoer/server/pkg/models/auth"
+	"github.com/diogox/Calendoer/generated/prisma-client"
+	"github.com/diogox/Calendoer/server/pkg/models"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"net/http"
 )
 
-var JWTSecret []byte
+var client *prisma.Client
+var jwtSecret []byte
+var tokenDurationInMinutes int
 
-func SetupRoutes(e *echo.Echo, jwtSecret string) {
+type RouteOptions struct {
+	JWTSecret              []byte
+	TokenDurationInMinutes int
+}
 
-	JWTSecret = []byte(jwtSecret)
+func SetupRoutes(e *echo.Echo, opts RouteOptions) {
+
+	// Instantiate Prisma client
+	client = prisma.New(nil)
+
+	// Set vars from options
+	jwtSecret = opts.JWTSecret
+	tokenDurationInMinutes = opts.TokenDurationInMinutes
+
+	e.Validator = newValidator()
 
 	// Serve website
 	e.File("/*", "../web/index.html")
 	e.File("/favicon.ico", "../web/images/favicon.ico")
 
-	// Login
-	e.POST("/login", handleLogin)
-
 	// By default, the key is extracted from the header "Authorization".
 	// To get it from a field named `token` in the JSON we could add `TokenLookup: "query:token"` to the JWT Configs
-	requireAuth := middleware.JWT(JWTSecret)
+	requireAuth := middleware.JWT(jwtSecret)
 
-	// Doesn't require Auth
+	// Auth
+	e.POST("/register", register)
+	e.POST("/login", login)
+	e.POST("/refresh", refreshToken, requireAuth) // Refreshes the JWT token
+
+	// Endpoint that requires authentication
 	apiEndpoint := e.Group("/api", requireAuth)
 
-	// Requires Auth
+	// API endpoints (TODO: Add endpoints here!)
 	apiEndpoint.GET("/users", handleGetUsers)
 }
 
-func handleLogin(c echo.Context) error {
-	logger := c.Logger()
-	logger.Info("Login request received!")
-
-	var userCreds auth.Credentials
-
-	// Get POST body
-	err := c.Bind(&userCreds)
-	if err != nil {
-		return err
-	}
-
-	// TODO: Perform login check here
-	/*
-		if userLogin.Username != "diogox" && userLogin.Password != "Diogox" {
-			// Throws unauthorized error
-			return echo.ErrUnauthorized
-		}
-	*/
-
-	// Create token
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	// Set claims
-	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = userCreds.Username
-	claims["admin"] = false
-
-	// TODO: Change expiry to 5 minutes, when done with development
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString(JWTSecret)
-	if err != nil {
-		return err
-	}
-
-	// Create response
-	res := auth.AuthResponse{
-		Token: t,
-	}
-
-	return c.JSON(http.StatusOK, res)
-}
-
 func handleGetUsers(c echo.Context) error {
+	ctx := c.Request().Context()
 	//logger := c.Logger()
 
 	token := c.Get("user").(*jwt.Token)
 
 	// Check if valid
 	if !token.Valid {
-		return echo.ErrUnauthorized
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: "Invalid Token!",
+		})
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-	return c.String(http.StatusOK, name)
+	username := claims["username"].(string)
+
+	users, err := client.Users(&prisma.UsersParams{
+		Where: &prisma.UserWhereInput{
+			Username: &username,
+		},
+	}).Exec(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.JSON(http.StatusOK, users)
 }

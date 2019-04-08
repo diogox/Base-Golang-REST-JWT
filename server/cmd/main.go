@@ -44,7 +44,11 @@ func main() {
 		)
 
 		// Routes
-		routes.SetupRoutes(e, app.JWTSecret)
+		opts := routes.RouteOptions{
+			JWTSecret: []byte(app.JWTSecret),
+			TokenDurationInMinutes: app.JWTDuration,
+		}
+		routes.SetupRoutes(e, opts)
 
 		return e.Start( fmt.Sprintf(":%s", app.Port) )
 	}

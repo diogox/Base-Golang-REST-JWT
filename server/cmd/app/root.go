@@ -6,13 +6,15 @@ import (
 )
 
 const (
-	PortEnv      = "PORT"
-	JWTSecretEnv = "JWT_SECRET"
+	PortEnv        = "PORT"
+	JWTSecretEnv   = "JWT_SECRET"
+	JWTDurationEnv = "JWT_DURATION"
 )
 
 var (
-	Port      string
-	JWTSecret string
+	Port        string
+	JWTSecret   string
+	JWTDuration int
 )
 
 var Cmd = &cobra.Command{
@@ -30,4 +32,7 @@ func init() {
 
 	// Get jwt secret
 	Cmd.PersistentFlags().StringVarP(&JWTSecret, "jwt-secret", "s", viper.GetString(JWTSecretEnv), "Set the JWT secret to be used")
+
+	// Get jwt duration
+	Cmd.PersistentFlags().IntVarP(&JWTDuration, "jwt-duration", "d", viper.GetInt(JWTDurationEnv), "Set the JWT duration before it needs to be refreshed")
 }
