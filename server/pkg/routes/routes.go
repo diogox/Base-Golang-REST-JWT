@@ -4,14 +4,17 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
+	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/diogox/REST-JWT/server/prisma-client"
+	"github.com/go-redis/redis"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
 var client *prisma.Client
+var refreshTokenWhitelist *redis.Client
 var emailClient *email.EmailClient
 var jwtSecret []byte
 var tokenDurationInMinutes int
@@ -30,6 +33,13 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Instantiate Prisma client
 	client = prisma.New(nil)
+
+	// Instantiate redis client
+	redisClient, err := refresh_whitelist.NewWhitelist()
+	if err != nil {
+		panic("Failed to connect to redis database: " + err.Error())
+	}
+	refreshTokenWhitelist = redisClient
 
 	// Instantiate email client
 	emailOpts := email.EmailClientOptions{
@@ -83,7 +93,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.POST("/api/auth/login", login)
 	e.POST("/api/auth/reset-password", sendPasswordResetEmail)
 	e.POST("/api/auth/reset-password/:token", resetPassword)
-	e.POST("/api/auth/refresh", refreshToken, requireAuth) // Refreshes the JWT token
+	e.POST("/api/auth/refresh", refreshToken) // Refreshes the JWT token
 
 	// Endpoint that requires authentication
 	apiEndpoint := e.Group("/api", requireAuth)

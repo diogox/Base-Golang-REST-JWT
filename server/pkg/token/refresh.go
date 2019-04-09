@@ -5,30 +5,30 @@ import (
 	"time"
 )
 
-const AuthToken = "AUTH_TOKEN"
+const RefreshToken = "REFRESH_TOKEN"
 
-type AuthTokenOptions struct {
+type RefreshTokenOptions struct {
 	JWTSecret         []byte
-	Username          string
+	UserId          string
 	DurationInMinutes int
 }
 
-func NewAuthToken(opts AuthTokenOptions) (string, error) {
-	// Create auth token
+func NewRefreshTokenToken(opts RefreshTokenOptions) (string, error) {
+
+	// Create verification token
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = opts.Username
-	claims["type"] = AuthToken
-	//claims["admin"] = false // TODO: Not needed for now...
+	claims["user_id"] = opts.UserId
+	claims["type"] = RefreshToken
 	claims["exp"] = time.Now().Add(time.Minute * time.Duration(opts.DurationInMinutes)).Unix()
 
 	// Generate encoded token
-	signedToken, err := token.SignedString(opts.JWTSecret)
+	refreshToken, err := token.SignedString(opts.JWTSecret)
 	if err != nil {
 		return "", err
 	}
 
-	return signedToken, nil
+	return refreshToken, nil
 }

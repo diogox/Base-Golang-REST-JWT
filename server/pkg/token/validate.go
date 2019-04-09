@@ -26,12 +26,20 @@ func AssertAndValidate(token *jwt.Token, expectedType string) bool {
 		return validateEmailVerificationToken(token)
 	case PasswordResetToken:
 		return validatePasswordResetToken(token)
+	case RefreshToken:
+		return validateRefreshToken(token)
 	}
 
 	return false
 }
 
 func validateAuthToken(token *jwt.Token) bool {
+	// Add specific checks here
+
+	return true
+}
+
+func validateRefreshToken(token *jwt.Token) bool {
 	// Add specific checks here
 
 	return true

@@ -6,5 +6,7 @@ type LoginCredentials struct {
 }
 
 type Response struct {
-	Token string `json:"token"`
+	AuthToken string `json:"auth_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpirationIntervalInMinutes int `json:"expiration_interval_in_minutes"`
 }
