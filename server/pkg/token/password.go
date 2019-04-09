@@ -5,26 +5,23 @@ import (
 	"time"
 )
 
-const (
-	AuthToken              = "AUTH_TOKEN"
-	EmailVerificationToken = "EMAIL_VERIFICATION_TOKEN"
-)
+const PasswordResetToken = "PASSWORD_RESET_TOKEN"
 
-type AuthTokenOptions struct {
+type PasswordResetTokenOptions struct {
 	JWTSecret         []byte
-	Username          string
+	UserId          string
 	DurationInMinutes int
 }
 
-func NewAuthToken(opts AuthTokenOptions) (string, error) {
-	// Create auth token
+func NewPasswordResetToken(opts PasswordResetTokenOptions) (string, error) {
+
+	// Create verification token
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = opts.Username
-	claims["type"] = AuthToken
-	//claims["admin"] = false // TODO: Not needed for now...
+	claims["user_id"] = opts.UserId
+	claims["type"] = PasswordResetToken
 	claims["exp"] = time.Now().Add(time.Minute * time.Duration(opts.DurationInMinutes)).Unix()
 
 	// Generate encoded token and send it as response.

@@ -2,13 +2,12 @@ package routes
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
+	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"net/http"
-	"time"
 )
 
 func sendVerificationEmail(c echo.Context) error {
@@ -61,17 +60,14 @@ func sendVerificationEmail(c echo.Context) error {
 		})
 	}
 
-	// Create verification token
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	// Set claims
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = reqUser.ID
-	claims["type"] = "verification"
-	claims["exp"] = time.Now().Add(time.Minute * time.Duration(tokenDurationInMinutes)).Unix()
-
 	// Generate encoded token and send it as response.
-	verificationToken, err := token.SignedString(jwtSecret)
+	opts := token.EmailVerificationTokenOptions{
+		JWTSecret: jwtSecret,
+		UserId: reqUser.ID,
+		DurationInMinutes: tokenDurationInMinutes,
+	}
+
+	verificationToken, err := token.NewEmailVerificationToken(opts)
 	if err != nil {
 		logger.Error(err.Error())
 

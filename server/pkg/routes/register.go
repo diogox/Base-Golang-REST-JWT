@@ -112,9 +112,6 @@ func verifyEmail(c echo.Context) error {
 	// Get context
 	ctx := c.Request().Context()
 
-	// Get logger
-	logger := c.Logger()
-
 	// Get token
 	tokenString := c.Param("token")
 	tokn, err := jwt.Parse(tokenString, func(token *jwt.Token) (i interface{}, e error) {
@@ -126,25 +123,19 @@ func verifyEmail(c echo.Context) error {
 		})
 	}
 
-	// Check if it's a verification token
-	claims := tokn.Claims.(jwt.MapClaims)
-	if claims["type"] != "verification" {
-		logger.Info("Verification Token")
-
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+	// Check if the token is valid
+	if !token.AssertAndValidate(tokn, token.EmailVerificationToken) {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse {
 			Message: "Invalid token!",
 		})
 	}
 
-	if !token.AssertAndValidate(tokn, token.EmailVerificationToken) {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Message: "Expired token!",
-		})
-	}
-
+	// Get user id associated with token
+	claims := tokn.Claims.(jwt.MapClaims)
 	userId, _ := claims["user_id"].(string)
-	isVerified := true
 
+	isVerified := true
+	// Update user to have email verified
 	_, err = client.UpdateUser(prisma.UserUpdateParams{
 		Where: prisma.UserWhereUniqueInput{
 			ID: &userId,
