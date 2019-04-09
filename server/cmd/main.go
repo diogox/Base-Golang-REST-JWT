@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/diogox/Calendoer/server/cmd/app"
-	"github.com/diogox/Calendoer/server/pkg/routes"
+	"github.com/diogox/REST-JWT/server/cmd/app"
+	"github.com/diogox/REST-JWT/server/pkg/routes"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"

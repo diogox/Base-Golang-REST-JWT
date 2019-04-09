@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/Calendoer/generated/prisma-client"
-	"github.com/diogox/Calendoer/server/pkg/models"
+	"github.com/diogox/REST-JWT/generated/prisma-client"
+	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
@@ -38,9 +38,9 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	requireAuth := middleware.JWT(jwtSecret)
 
 	// Auth
-	e.POST("/register", register)
-	e.POST("/login", login)
-	e.POST("/refresh", refreshToken, requireAuth) // Refreshes the JWT token
+	e.POST("/api/auth/register", register)
+	e.POST("/api/auth/login", login)
+	e.POST("/api/auth/refresh", refreshToken, requireAuth) // Refreshes the JWT token
 
 	// Endpoint that requires authentication
 	apiEndpoint := e.Group("/api", requireAuth)

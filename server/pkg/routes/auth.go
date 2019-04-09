@@ -2,9 +2,9 @@ package routes
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/Calendoer/generated/prisma-client"
-	"github.com/diogox/Calendoer/server/pkg/models"
-	"github.com/diogox/Calendoer/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/generated/prisma-client"
+	"github.com/diogox/REST-JWT/server/pkg/models"
+	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -47,7 +47,7 @@ func register(c echo.Context) error {
 
 	// Create user
 	query := prisma.UserCreateInput{
-		Email: req.Email,
+		Email:    req.Email,
 		Username: req.Username,
 		Password: string(hashedPassword),
 	}
@@ -59,9 +59,10 @@ func register(c echo.Context) error {
 		})
 	}
 
-	// TODO: Should I return a token, initially?
-
-	return c.JSON(http.StatusOK, newUser)
+	return c.JSON(http.StatusOK, models.User{
+		Email:    newUser.Email,
+		Username: newUser.Username,
+	})
 }
 
 func login(c echo.Context) error {
@@ -104,6 +105,7 @@ func login(c echo.Context) error {
 
 	user, err := client.User(query).Exec(ctx)
 	if err != nil {
+		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
 		return c.JSON(http.StatusUnauthorized, loginError)
 	}
