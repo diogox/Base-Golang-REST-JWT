@@ -68,7 +68,7 @@ func (client *Client) User(params UserWhereUniqueInput) *UserExec {
 		params,
 		[2]string{"UserWhereUniqueInput!", "User"},
 		"user",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -102,7 +102,7 @@ func (client *Client) Users(params *UsersParams) *UserExecArray {
 		wparams,
 		[3]string{"UserWhereInput", "UserOrderByInput", "User"},
 		"users",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExecArray{ret}
 }
@@ -126,7 +126,7 @@ func (client *Client) CreateUser(params UserCreateInput) *UserExec {
 		params,
 		[2]string{"UserCreateInput!", "User"},
 		"createUser",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -144,7 +144,7 @@ func (client *Client) UpdateUser(params UserUpdateParams) *UserExec {
 		},
 		[3]string{"UserUpdateInput!", "UserWhereUniqueInput!", "User"},
 		"updateUser",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -181,7 +181,7 @@ func (client *Client) UpsertUser(params UserUpsertParams) *UserExec {
 		uparams,
 		[4]string{"UserWhereUniqueInput!", "UserCreateInput!", "UserUpdateInput!", "User"},
 		"upsertUser",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -191,7 +191,7 @@ func (client *Client) DeleteUser(params UserWhereUniqueInput) *UserExec {
 		params,
 		[2]string{"UserWhereUniqueInput!", "User"},
 		"deleteUser",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -204,18 +204,20 @@ func (client *Client) DeleteManyUsers(params *UserWhereInput) *BatchPayloadExec 
 type UserOrderByInput string
 
 const (
-	UserOrderByInputIDAsc         UserOrderByInput = "id_ASC"
-	UserOrderByInputIDDesc        UserOrderByInput = "id_DESC"
-	UserOrderByInputEmailAsc      UserOrderByInput = "email_ASC"
-	UserOrderByInputEmailDesc     UserOrderByInput = "email_DESC"
-	UserOrderByInputUsernameAsc   UserOrderByInput = "username_ASC"
-	UserOrderByInputUsernameDesc  UserOrderByInput = "username_DESC"
-	UserOrderByInputPasswordAsc   UserOrderByInput = "password_ASC"
-	UserOrderByInputPasswordDesc  UserOrderByInput = "password_DESC"
-	UserOrderByInputCreatedAtAsc  UserOrderByInput = "createdAt_ASC"
-	UserOrderByInputCreatedAtDesc UserOrderByInput = "createdAt_DESC"
-	UserOrderByInputUpdatedAtAsc  UserOrderByInput = "updatedAt_ASC"
-	UserOrderByInputUpdatedAtDesc UserOrderByInput = "updatedAt_DESC"
+	UserOrderByInputIDAsc               UserOrderByInput = "id_ASC"
+	UserOrderByInputIDDesc              UserOrderByInput = "id_DESC"
+	UserOrderByInputEmailAsc            UserOrderByInput = "email_ASC"
+	UserOrderByInputEmailDesc           UserOrderByInput = "email_DESC"
+	UserOrderByInputUsernameAsc         UserOrderByInput = "username_ASC"
+	UserOrderByInputUsernameDesc        UserOrderByInput = "username_DESC"
+	UserOrderByInputPasswordAsc         UserOrderByInput = "password_ASC"
+	UserOrderByInputPasswordDesc        UserOrderByInput = "password_DESC"
+	UserOrderByInputIsEmailVerifiedAsc  UserOrderByInput = "isEmailVerified_ASC"
+	UserOrderByInputIsEmailVerifiedDesc UserOrderByInput = "isEmailVerified_DESC"
+	UserOrderByInputCreatedAtAsc        UserOrderByInput = "createdAt_ASC"
+	UserOrderByInputCreatedAtDesc       UserOrderByInput = "createdAt_DESC"
+	UserOrderByInputUpdatedAtAsc        UserOrderByInput = "updatedAt_ASC"
+	UserOrderByInputUpdatedAtDesc       UserOrderByInput = "updatedAt_DESC"
 )
 
 type MutationType string
@@ -227,21 +229,17 @@ const (
 )
 
 type UserCreateInput struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Email           string `json:"email"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	IsEmailVerified bool   `json:"isEmailVerified"`
 }
 
 type UserUpdateInput struct {
-	Email    *string `json:"email,omitempty"`
-	Username *string `json:"username,omitempty"`
-	Password *string `json:"password,omitempty"`
-}
-
-type UserUpdateManyMutationInput struct {
-	Email    *string `json:"email,omitempty"`
-	Username *string `json:"username,omitempty"`
-	Password *string `json:"password,omitempty"`
+	Email           *string `json:"email,omitempty"`
+	Username        *string `json:"username,omitempty"`
+	Password        *string `json:"password,omitempty"`
+	IsEmailVerified *bool   `json:"isEmailVerified,omitempty"`
 }
 
 type UserWhereInput struct {
@@ -301,9 +299,18 @@ type UserWhereInput struct {
 	PasswordNotStartsWith *string          `json:"password_not_starts_with,omitempty"`
 	PasswordEndsWith      *string          `json:"password_ends_with,omitempty"`
 	PasswordNotEndsWith   *string          `json:"password_not_ends_with,omitempty"`
+	IsEmailVerified       *bool            `json:"isEmailVerified,omitempty"`
+	IsEmailVerifiedNot    *bool            `json:"isEmailVerified_not,omitempty"`
 	And                   []UserWhereInput `json:"AND,omitempty"`
 	Or                    []UserWhereInput `json:"OR,omitempty"`
 	Not                   []UserWhereInput `json:"NOT,omitempty"`
+}
+
+type UserUpdateManyMutationInput struct {
+	Email           *string `json:"email,omitempty"`
+	Username        *string `json:"username,omitempty"`
+	Password        *string `json:"password,omitempty"`
+	IsEmailVerified *bool   `json:"isEmailVerified,omitempty"`
 }
 
 type UserSubscriptionWhereInput struct {
@@ -354,10 +361,11 @@ func (instance UserPreviousValuesExecArray) Exec(ctx context.Context) ([]UserPre
 }
 
 type UserPreviousValues struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	ID              string `json:"id"`
+	Email           string `json:"email"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	IsEmailVerified bool   `json:"isEmailVerified"`
 }
 
 type UserEdgeExec struct {
@@ -370,7 +378,7 @@ func (instance *UserEdgeExec) Node() *UserExec {
 		nil,
 		[2]string{"", "User"},
 		"node",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -415,7 +423,7 @@ func (instance *UserSubscriptionPayloadExec) Node() *UserExec {
 		nil,
 		[2]string{"", "User"},
 		"node",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserExec{ret}
 }
@@ -426,7 +434,7 @@ func (instance *UserSubscriptionPayloadExec) PreviousValues() *UserPreviousValue
 		nil,
 		[2]string{"", "UserPreviousValues"},
 		"previousValues",
-		[]string{"id", "email", "username", "password"})
+		[]string{"id", "email", "username", "password", "isEmailVerified"})
 
 	return &UserPreviousValuesExec{ret}
 }
@@ -493,10 +501,11 @@ func (instance UserExecArray) Exec(ctx context.Context) ([]User, error) {
 }
 
 type User struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	ID              string `json:"id"`
+	Email           string `json:"email"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	IsEmailVerified bool   `json:"isEmailVerified"`
 }
 
 type UserConnectionExec struct {

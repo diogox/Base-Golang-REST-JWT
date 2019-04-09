@@ -4,6 +4,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
+	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -51,10 +52,34 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// By default, the key is extracted from the header "Authorization".
 	// To get it from a field named `token` in the JSON we could add `TokenLookup: "query:token"` to the JWT Configs
-	requireAuth := middleware.JWT(jwtSecret)
+	requireAuth := func(next echo.HandlerFunc) echo.HandlerFunc {
+		// Middleware to check the token is of type `AuthToken`
+		f := func(c echo.Context) error {
+			if err := next(c); err != nil {
+				c.Error(err)
+			}
+
+			tokn := c.Get("user").(*jwt.Token)
+
+			// Check if valid
+			if !token.AssertAndValidate(tokn, token.AuthToken) {
+				return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+					Message: "Invalid Token!",
+				})
+			}
+
+			return nil
+		}
+
+		// Return both middlewares
+		jwtMiddleware := middleware.JWT(jwtSecret)
+		return jwtMiddleware(f)
+	}
 
 	// Auth
 	e.POST("/api/auth/register", register)
+	e.POST("/api/auth/verify", sendVerificationEmail)
+	e.GET("/api/auth/verify/:token", verifyEmail)
 	e.POST("/api/auth/login", login)
 	e.POST("/api/auth/refresh", refreshToken, requireAuth) // Refreshes the JWT token
 
@@ -69,16 +94,9 @@ func handleGetUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	//logger := c.Logger()
 
-	token := c.Get("user").(*jwt.Token)
+	tokn := c.Get("user").(*jwt.Token)
 
-	// Check if valid
-	if !token.Valid {
-		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: "Invalid Token!",
-		})
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
+	claims := tokn.Claims.(jwt.MapClaims)
 	username := claims["username"].(string)
 
 	users, err := client.Users(&prisma.UsersParams{

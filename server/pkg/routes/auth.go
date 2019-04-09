@@ -6,6 +6,7 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +18,9 @@ func register(c echo.Context) error {
 
 	// Get context
 	ctx := c.Request().Context()
+
+	// Get logger
+	logger := c.Logger()
 
 	// Request body
 	var req auth.NewRegistration
@@ -52,6 +56,7 @@ func register(c echo.Context) error {
 		Email:    req.Email,
 		Username: req.Username,
 		Password: string(hashedPassword),
+		IsEmailVerified: false,
 	}
 
 	newUser, err := client.CreateUser(query).Exec(ctx)
@@ -61,14 +66,37 @@ func register(c echo.Context) error {
 		})
 	}
 
+	// Create verification token
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// Set claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = newUser.ID
+	claims["type"] = "verification"
+	claims["exp"] = time.Now().Add(time.Minute * time.Duration(tokenDurationInMinutes)).Unix()
+
+	// Generate encoded token and send it as response.
+	verificationToken, err := token.SignedString(jwtSecret)
+	if err != nil {
+		logger.Error(err.Error())
+
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	logger.Info("Verify Token: " + verificationToken)
+
+	// Create `User` response
 	user := models.User{
 		Email:    newUser.Email,
 		Username: newUser.Username,
 	}
 
+	// Send verification email
 	err = emailClient.SendEmail(user, email.NewEmailOptions{
 		Subject: "Registration",
-		Message: fmt.Sprintf("Congrats %s you are now a user", user.Username),
+		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account.", user.Username, verificationToken),
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -77,6 +105,61 @@ func register(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, user)
+}
+
+func verifyEmail(c echo.Context) error {
+
+	// Get context
+	ctx := c.Request().Context()
+
+	// Get logger
+	logger := c.Logger()
+
+	// Get token
+	tokenString := c.Param("token")
+	tokn, err := jwt.Parse(tokenString, func(token *jwt.Token) (i interface{}, e error) {
+		return jwtSecret, nil
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: "Invalid token!",
+		})
+	}
+
+	// Check if it's a verification token
+	claims := tokn.Claims.(jwt.MapClaims)
+	if claims["type"] != "verification" {
+		logger.Info("Verification Token")
+
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: "Invalid token!",
+		})
+	}
+
+	if !token.AssertAndValidate(tokn, token.EmailVerificationToken) {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: "Expired token!",
+		})
+	}
+
+	userId, _ := claims["user_id"].(string)
+	isVerified := true
+
+	_, err = client.UpdateUser(prisma.UserUpdateParams{
+		Where: prisma.UserWhereUniqueInput{
+			ID: &userId,
+		},
+		Data: prisma.UserUpdateInput{
+			IsEmailVerified: &isVerified,
+		},
+	}).Exec(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.String(http.StatusOK, "Verification Successful")
 }
 
 func login(c echo.Context) error {
@@ -130,17 +213,21 @@ func login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, loginError)
 	}
 
-	// Create token
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	// Set claims
-	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = loginCreds.Username
-	claims["admin"] = false
-	claims["exp"] = time.Now().Add(time.Minute * time.Duration(tokenDurationInMinutes)).Unix()
+	// Check if email is verified
+	if !user.IsEmailVerified {
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: "Email not verified!",
+		})
+	}
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString(jwtSecret)
+	opts := token.AuthTokenOptions{
+		JWTSecret: jwtSecret,
+		Username: loginCreds.Username,
+		DurationInMinutes: tokenDurationInMinutes,
+	}
+
+	tokenStr, err := token.NewAuthToken(opts)
 	if err != nil {
 		logger.Error(err.Error())
 
@@ -151,7 +238,7 @@ func login(c echo.Context) error {
 
 	// Create response
 	res := auth.Response{
-		Token: t,
+		Token: tokenStr,
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -160,20 +247,13 @@ func login(c echo.Context) error {
 func refreshToken(c echo.Context) error {
 
 	// Get token
-	token := c.Get("user").(*jwt.Token)
+	tokn := c.Get("user").(*jwt.Token)
 
 	// Get logger
 	logger := c.Logger()
 
-	// Check if valid
-	if !token.Valid {
-		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: "Invalid Token!",
-		})
-	}
-
 	// Get expiration time
-	claims := token.Claims.(jwt.MapClaims)
+	claims := tokn.Claims.(jwt.MapClaims)
 	expiration, _ := claims["exp"].(int64)
 
 	// Make sure token can only be refreshed 30 seconds away from its expiration
@@ -184,7 +264,7 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString(jwtSecret)
+	tokenStr, err := tokn.SignedString(jwtSecret)
 	if err != nil {
 		logger.Error(err.Error())
 
@@ -195,6 +275,97 @@ func refreshToken(c echo.Context) error {
 
 	// Return new token
 	return c.JSON(http.StatusOK, auth.Response{
-		Token: t,
+		Token: tokenStr,
 	})
+}
+
+func sendVerificationEmail(c echo.Context) error {
+
+	// Get context
+	ctx := c.Request().Context()
+
+	// Get logger
+	logger := c.Logger()
+
+	// Request body
+	var req struct {
+		Email string `json:"email" validate:"email,required"`
+	}
+
+	// Get POST body
+	err := c.Bind(&req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: "Invalid request body!",
+		})
+	}
+
+	// Validate request
+	err = c.Validate(req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	// Get user
+	query := prisma.UserWhereUniqueInput{
+		Email: &req.Email,
+	}
+
+	reqUser, err := client.User(query).Exec(ctx)
+	if err != nil {
+		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
+		// No user found
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: "No user found with that email!",
+		})
+	}
+
+	// Check if email is verified
+	if reqUser.IsEmailVerified {
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: "Email already verified!",
+		})
+	}
+
+	// Create verification token
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// Set claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = reqUser.ID
+	claims["type"] = "verification"
+	claims["exp"] = time.Now().Add(time.Minute * time.Duration(tokenDurationInMinutes)).Unix()
+
+	// Generate encoded token and send it as response.
+	verificationToken, err := token.SignedString(jwtSecret)
+	if err != nil {
+		logger.Error(err.Error())
+
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	logger.Info("Verify Token: " + verificationToken)
+
+	// Create `User` response
+	user := models.User{
+		Email:    reqUser.Email,
+		Username: reqUser.Username,
+	}
+
+	// Send verification email
+	err = emailClient.SendEmail(user, email.NewEmailOptions{
+		Subject: "Registration",
+		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account.", user.Username, verificationToken),
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: "Failed to send verification email!\n" + err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
