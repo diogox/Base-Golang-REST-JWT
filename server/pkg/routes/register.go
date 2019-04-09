@@ -71,7 +71,7 @@ func register(c echo.Context) error {
 		DurationInMinutes: tokenDurationInMinutes,
 		UserId: newUser.ID,
 	}
-	
+
 	verificationToken, err := token.NewEmailVerificationToken(opts)
 	if err != nil {
 		logger.Error(err.Error())
@@ -92,7 +92,7 @@ func register(c echo.Context) error {
 	// Send verification email
 	err = emailClient.SendEmail(user, email.NewEmailOptions{
 		Subject: "Registration",
-		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account.", user.Username, verificationToken),
+		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s.", user.Username, verificationToken),
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
