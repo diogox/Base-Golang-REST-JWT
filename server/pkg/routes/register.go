@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"time"
 )
 
 func register(c echo.Context) error {
@@ -66,17 +65,14 @@ func register(c echo.Context) error {
 		})
 	}
 
-	// Create verification token
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	// Set claims
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = newUser.ID
-	claims["type"] = "verification"
-	claims["exp"] = time.Now().Add(time.Minute * time.Duration(tokenDurationInMinutes)).Unix()
-
 	// Generate encoded token and send it as response.
-	verificationToken, err := token.SignedString(jwtSecret)
+	opts := token.EmailVerificationTokenOptions{
+		JWTSecret: jwtSecret,
+		DurationInMinutes: tokenDurationInMinutes,
+		UserId: newUser.ID,
+	}
+	
+	verificationToken, err := token.NewEmailVerificationToken(opts)
 	if err != nil {
 		logger.Error(err.Error())
 

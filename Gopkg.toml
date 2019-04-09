@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/urfave/cli"
   version = "1.20.0"
+
+[[constraint]]
+  name = "gopkg.in/gomail.v2"
+  branch = "v2"
