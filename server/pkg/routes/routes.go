@@ -2,26 +2,42 @@ package routes
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/REST-JWT/generated/prisma-client"
+	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
+	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
 var client *prisma.Client
+var emailClient *email.EmailClient
 var jwtSecret []byte
 var tokenDurationInMinutes int
 
 type RouteOptions struct {
 	JWTSecret              []byte
 	TokenDurationInMinutes int
+	Email                  string
+	EmailHost              string
+	EmailPort              int
+	EmailUsername          string
+	EmailPassword          string
 }
 
 func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Instantiate Prisma client
 	client = prisma.New(nil)
+
+	// Instantiate email client
+	emailOpts := email.EmailClientOptions{
+		Host:     opts.EmailHost,
+		Port:     opts.EmailPort,
+		Username: opts.EmailUsername,
+		Password: opts.EmailPassword,
+	}
+	emailClient = email.NewEmailClient(opts.Email, emailOpts)
 
 	// Set vars from options
 	jwtSecret = opts.JWTSecret
@@ -71,7 +87,9 @@ func handleGetUsers(c echo.Context) error {
 		},
 	}).Exec(ctx)
 	if err != nil {
-		panic(err)
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, users)

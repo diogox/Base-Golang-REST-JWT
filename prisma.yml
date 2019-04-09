@@ -3,4 +3,4 @@ datamodel: datamodel.prisma
 
 generate:
   - generator: go-client
-    output: ./generated/prisma-client/
+    output: ./server/prisma-client/

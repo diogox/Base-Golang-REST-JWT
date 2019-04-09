@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/REST-JWT/generated/prisma-client"
+	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -59,10 +61,22 @@ func register(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, models.User{
+	user := models.User{
 		Email:    newUser.Email,
 		Username: newUser.Username,
+	}
+
+	err = emailClient.SendEmail(user, email.NewEmailOptions{
+		Subject: "Registration",
+		Message: fmt.Sprintf("Congrats %s you are now a user", user.Username),
 	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: "Failed to send verification email!\n" + err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
 
 func login(c echo.Context) error {

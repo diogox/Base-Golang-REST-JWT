@@ -47,6 +47,13 @@ func main() {
 		opts := routes.RouteOptions{
 			JWTSecret: []byte(app.JWTSecret),
 			TokenDurationInMinutes: app.JWTDuration,
+
+			// Email service configs
+			Email: app.Email,
+			EmailHost: app.EmailHost,
+			EmailPort: app.EmailPort,
+			EmailUsername: app.EmailUsername,
+			EmailPassword: app.EmailPassword,
 		}
 		routes.SetupRoutes(e, opts)
 
