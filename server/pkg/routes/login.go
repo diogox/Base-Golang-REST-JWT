@@ -3,12 +3,12 @@ package routes
 import (
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"time"
 )
 
 // TODO: Need to check refresh token whitelist for previous entries for a given user, if it exists,
@@ -105,9 +105,7 @@ func login(c echo.Context) error {
 	}
 
 	// Add the refresh token to the whitelist (and make it expire after a determined amount of time)
-	spareTime := 1
-	expiresIn := time.Minute * time.Duration(tokenDurationInMinutes + spareTime)
-	err = refreshTokenWhitelist.Set(refreshtokenStr, "", expiresIn).Err()
+	err = refresh_whitelist.AddToWhitelist(refreshTokenWhitelist, refreshtokenStr, tokenDurationInMinutes)
 	if err != nil {
 		panic(err)
 	}

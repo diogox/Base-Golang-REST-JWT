@@ -4,6 +4,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
@@ -90,14 +91,12 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Add new token to whitelist
-	spareTime := 1
-	expiresIn := time.Minute * time.Duration(tokenDurationInMinutes + spareTime)
-	_, err = refreshTokenWhitelist.Set(newRefreshtokenStr, "", expiresIn).Result()
+	err = refresh_whitelist.AddToWhitelist(refreshTokenWhitelist, newRefreshtokenStr, tokenDurationInMinutes)
 	if err != nil {
 
-		// Not found (most likely)
+		// Already exists (most likely)
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Message: "Invalid Token!",
+			Message: "Token already exists!",
 		})
 	}
 
