@@ -20,22 +20,32 @@ var jwtSecret []byte
 var tokenDurationInMinutes int
 
 type RouteOptions struct {
+	// Server Configs
 	JWTSecret              []byte
 	TokenDurationInMinutes int
-	Email                  string
-	EmailHost              string
-	EmailPort              int
-	EmailUsername          string
-	EmailPassword          string
+
+	// Databases Configs
+	PrismaHost string
+	RedisHost  string
+
+	// Email Service Configs
+	Email         string
+	EmailHost     string
+	EmailPort     int
+	EmailUsername string
+	EmailPassword string
 }
 
 func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Instantiate Prisma client
-	client = prisma.New(nil)
+	prismaOpts := prisma.Options{
+		Endpoint: "http://" + opts.PrismaHost + ":4467",
+	}
+	client = prisma.New(&prismaOpts)
 
 	// Instantiate redis client
-	redisClient, err := refresh_whitelist.NewWhitelist()
+	redisClient, err := refresh_whitelist.NewWhitelist(opts.RedisHost)
 	if err != nil {
 		panic("Failed to connect to redis database: " + err.Error())
 	}

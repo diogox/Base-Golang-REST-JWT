@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-func NewWhitelist() (*redis.Client, error) {
+func NewWhitelist(host string) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     host + ":6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
@@ -23,4 +23,6 @@ func AddToWhitelist(client *redis.Client, tokenStr string, tokenDuration int) er
 	if err != nil {
 		return err
 	}
+
+	return nil
 }

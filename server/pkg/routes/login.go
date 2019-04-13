@@ -18,10 +18,6 @@ func login(c echo.Context) error {
 	// The previous token doesn't get invalidated, we just have to rely on the short duration of each token.
 	// To invalidate, we'd need to hold a token 'blacklist' in a database (probably Redis), but we're not doing that here.
 
-	loginError := models.ErrorResponse{
-		Message: "Username or password incorrect!",
-	}
-
 	// Get context
 	ctx := c.Request().Context()
 
@@ -56,13 +52,17 @@ func login(c echo.Context) error {
 	if err != nil {
 		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
-		return c.JSON(http.StatusUnauthorized, loginError)
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 
 	// Check if the password matches
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginCreds.Password))
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, loginError)
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 
 	// Check if email is verified

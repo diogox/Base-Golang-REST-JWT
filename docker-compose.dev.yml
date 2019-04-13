@@ -31,30 +31,5 @@ services:
     image: redis
     ports:
       - "6379:6379"
-  server:
-    image: server
-    restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-    links:
-      - redis # ensures that redis is a host that the container can find
-      - prisma
-    depends_on:
-      - redis
-      - prisma
-    environment:
-      - PORT=${PORT}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_DURATION=${JWT_DURATION}
-      - PRISMA_HOST=prisma
-      - REDIS_HOST=redis
-      - EMAIL=${EMAIL}
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_PORT=${EMAIL_PORT}
-      - EMAIL_USERNAME=${EMAIL_USERNAME}
-      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
-    ports:
-      - "${PORT}:${PORT}"
 volumes:
   postgres:

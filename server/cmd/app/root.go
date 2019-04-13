@@ -6,9 +6,16 @@ import (
 )
 
 const (
-	PortEnv          = "PORT"
-	JWTSecretEnv     = "JWT_SECRET"
-	JWTDurationEnv   = "JWT_DURATION"
+	// Server Config
+	PortEnv        = "PORT"
+	JWTSecretEnv   = "JWT_SECRET"
+	JWTDurationEnv = "JWT_DURATION"
+
+	// Databases Config
+	PrismaHostEnv = "PRISMA_HOST"
+	RedisHostEnv  = "REDIS_HOST"
+
+	// Email Service Config
 	EmailEnv         = "EMAIL"
 	EmailHostEnv     = "EMAIL_HOST"
 	EmailPortEnv     = "EMAIL_PORT"
@@ -17,9 +24,16 @@ const (
 )
 
 var (
-	Port          string
-	JWTSecret     string
-	JWTDuration   int
+	// Server Config
+	Port        string
+	JWTSecret   string
+	JWTDuration int
+
+	// Databases Config
+	PrismaHost string
+	RedisHost  string
+
+	// Email Service Config
 	Email         string
 	EmailHost     string
 	EmailPort     int
@@ -37,6 +51,8 @@ func init() {
 	// Start viper
 	viper.AutomaticEnv()
 
+	/* Server Configuration */
+
 	// Get port
 	Cmd.PersistentFlags().StringVarP(&Port, "port", "p", viper.GetString(PortEnv), "Set the port to be used")
 
@@ -45,6 +61,12 @@ func init() {
 
 	// Get jwt duration
 	Cmd.PersistentFlags().IntVarP(&JWTDuration, "jwt-duration", "d", viper.GetInt(JWTDurationEnv), "Set the JWT duration before it needs to be refreshed")
+
+	/* Databases Configuration */
+	Cmd.PersistentFlags().StringVarP(&PrismaHost, "prisma", "", viper.GetString(PrismaHostEnv), "Set the Host name for the prisma service.")
+	Cmd.PersistentFlags().StringVarP(&RedisHost, "redis", "", viper.GetString(RedisHostEnv), "Set the Host name for the redis database.")
+
+	/* Email Service Configuration */
 
 	// Get our email
 	Cmd.PersistentFlags().StringVarP(&Email, "email", "", viper.GetString(EmailEnv), "Set the email to e used")

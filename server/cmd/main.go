@@ -45,10 +45,15 @@ func main() {
 
 		// Routes
 		opts := routes.RouteOptions{
+			// Server Configs
 			JWTSecret: []byte(app.JWTSecret),
 			TokenDurationInMinutes: app.JWTDuration,
 
-			// Email service configs
+			// Databases Configs
+			PrismaHost: app.PrismaHost,
+			RedisHost: app.RedisHost,
+
+			// Email Service Configs
 			Email: app.Email,
 			EmailHost: app.EmailHost,
 			EmailPort: app.EmailPort,
