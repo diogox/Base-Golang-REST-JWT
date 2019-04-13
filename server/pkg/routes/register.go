@@ -3,18 +3,22 @@ package routes
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
 func register(c echo.Context) error {
+	return registerHandler(c, db)
+}
 
+// For testing purposes
+func registerHandler(c echo.Context, db server.SqlDB) error {
 	// Get context
 	ctx := c.Request().Context()
 
@@ -51,25 +55,23 @@ func register(c echo.Context) error {
 	}
 
 	// Create user
-	query := prisma.UserCreateInput{
+	newUser, err := db.CreateUser(ctx, &auth.NewRegistration{
 		Email:    req.Email,
 		Username: req.Username,
 		Password: string(hashedPassword),
-		IsEmailVerified: false,
-	}
-
-	newUser, err := client.CreateUser(query).Exec(ctx)
+	})
 	if err != nil {
+		logger.Error(err)
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Message: "Email or Username already in use!",
 		})
 	}
 
-	// Generate encoded token and send it as response.
+	// Generate encoded token to verify email
 	opts := token.EmailVerificationTokenOptions{
-		JWTSecret: jwtSecret,
+		JWTSecret:         jwtSecret,
 		DurationInMinutes: tokenDurationInMinutes,
-		UserId: newUser.ID,
+		UserId:            newUser.ID,
 	}
 
 	verificationToken, err := token.NewEmailVerificationToken(opts)
@@ -81,18 +83,13 @@ func register(c echo.Context) error {
 		})
 	}
 
+	// TODO: Delete this in the future!
 	logger.Info("Verify Token: " + verificationToken)
 
-	// Create `User` response
-	user := models.User{
-		Email:    newUser.Email,
-		Username: newUser.Username,
-	}
-
-	// Send verification email
-	err = emailClient.SendEmail(user, email.NewEmailOptions{
+	// Send Verification Email
+	err = emailClient.SendEmail(*newUser, email.NewEmailOptions{
 		Subject: "Registration",
-		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s.", user.Username, verificationToken),
+		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s.", newUser.Username, verificationToken),
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -100,7 +97,11 @@ func register(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, user)
+	// Return Successful Response
+	return c.JSON(http.StatusCreated, models.User{
+		Email:    newUser.Email,
+		Username: newUser.Username,
+	})
 }
 
 func verifyEmail(c echo.Context) error {
@@ -121,7 +122,7 @@ func verifyEmail(c echo.Context) error {
 
 	// Check if the token is valid
 	if !token.AssertAndValidate(tokn, token.EmailVerificationToken) {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Message: "Invalid token!",
 		})
 	}
@@ -130,17 +131,12 @@ func verifyEmail(c echo.Context) error {
 	claims := tokn.Claims.(jwt.MapClaims)
 	userId, _ := claims["user_id"].(string)
 
-	isVerified := true
 	// Update user to have email verified
-	_, err = client.UpdateUser(prisma.UserUpdateParams{
-		Where: prisma.UserWhereUniqueInput{
-			ID: &userId,
-		},
-		Data: prisma.UserUpdateInput{
-			IsEmailVerified: &isVerified,
-		},
-	}).Exec(ctx)
-	if err != nil {
+	updatedUser := models.User{
+		IsEmailVerified: true,
+	}
+
+	if _, err := db.UpdateUserByID(ctx, userId, &updatedUser); err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
 		})

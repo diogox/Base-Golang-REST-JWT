@@ -2,18 +2,19 @@ package routes
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/diogox/REST-JWT/server"
+	"github.com/diogox/REST-JWT/server/pkg/database"
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/go-redis/redis"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
-var client *prisma.Client
+var db server.SqlDB
 var refreshTokenWhitelist *redis.Client
 var emailClient *email.EmailClient
 var jwtSecret []byte
@@ -39,10 +40,7 @@ type RouteOptions struct {
 func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Instantiate Prisma client
-	prismaOpts := prisma.Options{
-		Endpoint: "http://" + opts.PrismaHost + ":4467",
-	}
-	client = prisma.New(&prismaOpts)
+	db = server.SqlDB( database.NewPrismaDB(opts.PrismaHost) )
 
 	// Instantiate redis client
 	redisClient, err := refresh_whitelist.NewWhitelist(opts.RedisHost)
@@ -121,11 +119,7 @@ func handleGetUsers(c echo.Context) error {
 	claims := tokn.Claims.(jwt.MapClaims)
 	username := claims["username"].(string)
 
-	users, err := client.Users(&prisma.UsersParams{
-		Where: &prisma.UserWhereInput{
-			Username: &username,
-		},
-	}).Exec(ctx)
+	users, err := db.GetUserByUsername(ctx, username)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),

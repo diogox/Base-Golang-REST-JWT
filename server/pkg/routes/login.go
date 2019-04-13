@@ -5,7 +5,6 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -44,11 +43,7 @@ func login(c echo.Context) error {
 	}
 
 	// Get user
-	query := prisma.UserWhereUniqueInput{
-		Username: &loginCreds.Username,
-	}
-
-	user, err := client.User(query).Exec(ctx)
+	user, err := db.GetUserByUsername(ctx, loginCreds.Username)
 	if err != nil {
 		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
@@ -111,7 +106,7 @@ func login(c echo.Context) error {
 	}
 
 	// Create response
-	res := auth.Response{
+	res := auth.LoginResponse{
 		AuthToken: tokenStr,
 		RefreshToken: refreshtokenStr,
 		ExpirationIntervalInMinutes: tokenDurationInMinutes,

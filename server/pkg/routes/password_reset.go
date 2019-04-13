@@ -6,7 +6,6 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -41,11 +40,7 @@ func sendPasswordResetEmail(c echo.Context) error {
 	}
 
 	// Get user
-	query := prisma.UserWhereUniqueInput{
-		Email: &req.Email,
-	}
-
-	reqUser, err := client.User(query).Exec(ctx)
+	reqUser, err := db.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
@@ -149,23 +144,17 @@ func resetPassword(c echo.Context) error {
 	// Salt and hash the password using the bcrypt algorithm
 	// The second argument is the cost of hashing, which we arbitrarily set as 8
 	// (this value can be more or less, depending on the computing power you wish to utilize)
-	hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(newPasswordReq.Password), 8)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPasswordReq.Password), 8)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
 
-	hashedPassword := string(hashedPasswordBytes)
 	// Update user to have the new password
-	_, err = client.UpdateUser(prisma.UserUpdateParams{
-		Where: prisma.UserWhereUniqueInput{
-			ID: &userId,
-		},
-		Data: prisma.UserUpdateInput{
-			Password: &hashedPassword,
-		},
-	}).Exec(ctx)
+	_, err = db.UpdateUserByID(ctx, userId, &models.User{
+		Password: string(hashedPassword),
+	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),

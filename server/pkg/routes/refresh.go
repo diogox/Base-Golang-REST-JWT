@@ -6,7 +6,6 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"net/http"
 	"time"
@@ -100,17 +99,12 @@ func refreshToken(c echo.Context) error {
 		})
 	}
 
-	// Get user // TODO: Remove this later? Unnecessary overhead
-	query := prisma.UserWhereUniqueInput{
-		ID: &userId,
-	}
-
 	// Get context
 	ctx := c.Request().Context()
 
-	user, err := client.User(query).Exec(ctx)
+	// Get user // TODO: Remove this later? Unnecessary overhead
+	user, err := db.GetUserByID(ctx, userId)
 	if err != nil {
-		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Message: "Failed to get user",
@@ -133,7 +127,7 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Return new token
-	return c.JSON(http.StatusOK, auth.Response{
+	return c.JSON(http.StatusOK, auth.LoginResponse{
 		AuthToken: newAuthtokenStr, // TODO: Probably should return different struct (don't need this field)
 		RefreshToken: newRefreshtokenStr,
 		ExpirationIntervalInMinutes: tokenDurationInMinutes,

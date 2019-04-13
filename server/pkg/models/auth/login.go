@@ -5,7 +5,7 @@ type LoginCredentials struct {
 	Password string `json:"password" validate:"required"`
 }
 
-type Response struct {
+type LoginResponse struct {
 	AuthToken string `json:"auth_token"`
 	RefreshToken string `json:"refresh_token"`
 	ExpirationIntervalInMinutes int `json:"expiration_interval_in_minutes"`

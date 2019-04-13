@@ -5,7 +5,6 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/diogox/REST-JWT/server/prisma-client"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -40,13 +39,8 @@ func sendVerificationEmail(c echo.Context) error {
 	}
 
 	// Get user
-	query := prisma.UserWhereUniqueInput{
-		Email: &req.Email,
-	}
-
-	reqUser, err := client.User(query).Exec(ctx)
+	reqUser, err := db.GetUserByEmail(ctx, req.Email)
 	if err != nil {
-		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Message: "No user found with that email!",
@@ -87,7 +81,7 @@ func sendVerificationEmail(c echo.Context) error {
 	// Send verification email
 	err = emailClient.SendEmail(user, email.NewEmailOptions{
 		Subject: "Registration",
-		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account.", user.Username, verificationToken),
+		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s", user.Username, verificationToken),
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
