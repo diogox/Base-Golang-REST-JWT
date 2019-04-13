@@ -27,7 +27,7 @@ sudo systemctl start redis
 ## Release Mode
 To run the project in *Release Mode*, we only need to run the `docker-compose.yml` file, like so:
 ```
-sudo docker-compose up -d
+sudo docker-compose up -d --build
 ```
 
 (You may also have to disable `redis`, if you have it installed.)
