@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
@@ -79,7 +78,7 @@ func sendVerificationEmail(c echo.Context) error {
 	}
 
 	// Send verification email
-	err = emailClient.SendEmail(user, email.NewEmailOptions{
+	err = emailService.SendEmail(user, models.NewEmail{
 		Subject: "Registration",
 		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s", user.Username, verificationToken),
 	})

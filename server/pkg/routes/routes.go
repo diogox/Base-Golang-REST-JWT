@@ -16,7 +16,7 @@ import (
 
 var db server.SqlDB
 var refreshTokenWhitelist *redis.Client
-var emailClient *email.EmailClient
+var emailService server.EmailService
 var jwtSecret []byte
 var tokenDurationInMinutes int
 
@@ -56,7 +56,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 		Username: opts.EmailUsername,
 		Password: opts.EmailPassword,
 	}
-	emailClient = email.NewEmailClient(opts.Email, emailOpts)
+	emailService = server.EmailService( email.NewEmailClient(opts.Email, emailOpts) )
 
 	// Set vars from options
 	jwtSecret = opts.JWTSecret

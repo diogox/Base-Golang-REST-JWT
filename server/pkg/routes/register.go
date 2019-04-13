@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server"
-	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/token"
@@ -14,11 +13,11 @@ import (
 )
 
 func register(c echo.Context) error {
-	return registerHandler(c, db)
+	return registerHandler(c, db, emailService)
 }
 
 // For testing purposes
-func registerHandler(c echo.Context, db server.SqlDB) error {
+func registerHandler(c echo.Context, db server.SqlDB, emailService server.EmailService) error {
 	// Get context
 	ctx := c.Request().Context()
 
@@ -87,7 +86,7 @@ func registerHandler(c echo.Context, db server.SqlDB) error {
 	logger.Info("Verify Token: " + verificationToken)
 
 	// Send Verification Email
-	err = emailClient.SendEmail(*newUser, email.NewEmailOptions{
+	err = emailService.SendEmail(*newUser, models.NewEmail{
 		Subject: "Registration",
 		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s.", newUser.Username, verificationToken),
 	})

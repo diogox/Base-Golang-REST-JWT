@@ -6,8 +6,3 @@ type EmailClientOptions struct {
 	Username string
 	Password string
 }
-
-type NewEmailOptions struct {
-	Subject string
-	Message string
-}

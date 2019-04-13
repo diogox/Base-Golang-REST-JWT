@@ -25,7 +25,7 @@ type EmailClient struct {
 	Password string
 }
 
-func (ec *EmailClient) SendEmail(user models.User, opts NewEmailOptions) error {
+func (ec *EmailClient) SendEmail(user models.User, opts models.NewEmail) error {
 
 	// Create new message
 	m := gomail.NewMessage()

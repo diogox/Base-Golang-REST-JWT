@@ -1,7 +1,8 @@
 package routes
 
 import (
-	"github.com/diogox/REST-JWT/server"
+	"encoding/json"
+	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/routes/tests"
 	"github.com/labstack/echo"
 	"github.com/magiconair/properties/assert"
@@ -12,14 +13,21 @@ import (
 )
 
 var (
-	newUserJSON = `{"email": "email@gmail.com","username": "Username","password": "Password"}`
+	newRegistration = auth.NewRegistration{
+		Email:    "email@gmail.com",
+		Username: "username",
+		Password: "Password",
+	}
 )
 
 func TestRegister(t *testing.T) {
 
 	// Setup
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/auth/register", strings.NewReader(newUserJSON))
+
+	reqJSON, _ := json.Marshal(newRegistration)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/register", strings.NewReader(string(reqJSON)))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -32,8 +40,6 @@ func TestRegister(t *testing.T) {
 	SetupRoutes(e, opts)
 
 	// Assertions
-	assert.Equal(t, registerHandler(c, server.SqlDB(tests.NewMockDb())), nil)
-
-	assert.Equal(t, rec.Code, http.StatusOK)
-	assert.Equal(t, rec.Body.String(), newUserJSON)
+	assert.Equal(t, registerHandler(c, tests.NewMockDb(), tests.NewMockEmailService()), nil)
+	assert.Equal(t, rec.Code, http.StatusCreated)
 }

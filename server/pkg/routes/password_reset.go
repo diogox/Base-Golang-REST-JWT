@@ -3,7 +3,6 @@ package routes
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
@@ -81,7 +80,7 @@ func sendPasswordResetEmail(c echo.Context) error {
 	}
 
 	// Send verification email
-	err = emailClient.SendEmail(user, email.NewEmailOptions{
+	err = emailService.SendEmail(user, models.NewEmail{
 		Subject: "Registration",
 		Message: fmt.Sprintf("%s, you have requested a password reset: %s", user.Username, resetToken),
 	})
