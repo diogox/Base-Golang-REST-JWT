@@ -31,3 +31,9 @@ sudo docker-compose up -d --build
 ```
 
 (You may also have to disable `redis`, if you have it installed.)
+
+# Tests
+To run all the unit tests included, use the command:
+```
+go test ./...
+```
