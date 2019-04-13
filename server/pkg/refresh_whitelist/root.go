@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func NewWhitelist(host string) (*redis.Client, error) {
+func NewWhitelist(host string) (*Whitelist, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     host + ":6379",
 		Password: "", // no password set
@@ -13,16 +13,30 @@ func NewWhitelist(host string) (*redis.Client, error) {
 	})
 
 	_, err := client.Ping().Result()
-	return client, err
+	return &Whitelist{
+		client: client,
+	}, err
 }
 
-func AddToWhitelist(client *redis.Client, tokenStr string, tokenDuration int) error {
+type Whitelist struct {
+	client *redis.Client
+}
+
+func (w *Whitelist) Set(tokenStr string, tokenDuration int) error {
 	spareTime := 1
 	expiresIn := time.Minute * time.Duration(tokenDuration + spareTime)
-	err := client.Set(tokenStr, "", expiresIn).Err()
+	err := w.client.Set(tokenStr, "", expiresIn).Err()
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (w *Whitelist) Get(tokenStr string) (string, error) {
+	return w.client.Get(tokenStr).Result()
+}
+
+func (w *Whitelist) Del(tokenStr string) (int64, error) {
+	return w.client.Del(tokenStr).Result()
 }

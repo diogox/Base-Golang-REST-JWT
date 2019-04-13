@@ -4,7 +4,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
-	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"net/http"
@@ -38,7 +37,7 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Get from whitelist
-	_, err = refreshTokenWhitelist.Get(req.RefreshToken).Result()
+	_, err = refreshTokenWhitelist.Get(req.RefreshToken)
 	if err != nil {
 
 		// Not found (most likely)
@@ -82,7 +81,7 @@ func refreshToken(c echo.Context) error {
 	// TODO: Refactor repetitive code into smaller functions
 
 	// Remove previous token from whitelist
-	_, err = refreshTokenWhitelist.Del(req.RefreshToken).Result()
+	_, err = refreshTokenWhitelist.Del(req.RefreshToken)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
@@ -90,7 +89,7 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Add new token to whitelist
-	err = refresh_whitelist.AddToWhitelist(refreshTokenWhitelist, newRefreshtokenStr, tokenDurationInMinutes)
+	err = refreshTokenWhitelist.Set(newRefreshtokenStr, tokenDurationInMinutes)
 	if err != nil {
 
 		// Already exists (most likely)

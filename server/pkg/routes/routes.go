@@ -8,14 +8,13 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
-	"github.com/go-redis/redis"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
 var db server.SqlDB
-var refreshTokenWhitelist *redis.Client
+var refreshTokenWhitelist server.InMemoryDB
 var emailService server.EmailService
 var jwtSecret []byte
 var tokenDurationInMinutes int
@@ -40,14 +39,14 @@ type RouteOptions struct {
 func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Instantiate Prisma client
-	db = server.SqlDB( database.NewPrismaDB(opts.PrismaHost) )
+	db = server.SqlDB(database.NewPrismaDB(opts.PrismaHost))
 
 	// Instantiate redis client
-	redisClient, err := refresh_whitelist.NewWhitelist(opts.RedisHost)
+	whitelist, err := refresh_whitelist.NewWhitelist(opts.RedisHost)
 	if err != nil {
 		panic("Failed to connect to redis database: " + err.Error())
 	}
-	refreshTokenWhitelist = redisClient
+	refreshTokenWhitelist = whitelist
 
 	// Instantiate email client
 	emailOpts := email.EmailClientOptions{
@@ -56,7 +55,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 		Username: opts.EmailUsername,
 		Password: opts.EmailPassword,
 	}
-	emailService = server.EmailService( email.NewEmailClient(opts.Email, emailOpts) )
+	emailService = server.EmailService(email.NewEmailClient(opts.Email, emailOpts))
 
 	// Set vars from options
 	jwtSecret = opts.JWTSecret

@@ -1,9 +1,9 @@
 package routes
 
 import (
+	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
-	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
@@ -14,6 +14,11 @@ import (
 //  remove it and return new refresh token.
 
 func login(c echo.Context) error {
+	return loginHandler(c, db, refreshTokenWhitelist)
+}
+
+// For testing purposes
+func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) error {
 	// The previous token doesn't get invalidated, we just have to rely on the short duration of each token.
 	// To invalidate, we'd need to hold a token 'blacklist' in a database (probably Redis), but we're not doing that here.
 
@@ -100,7 +105,7 @@ func login(c echo.Context) error {
 	}
 
 	// Add the refresh token to the whitelist (and make it expire after a determined amount of time)
-	err = refresh_whitelist.AddToWhitelist(refreshTokenWhitelist, refreshtokenStr, tokenDurationInMinutes)
+	err = whitelist.Set(refreshtokenStr, tokenDurationInMinutes)
 	if err != nil {
 		panic(err)
 	}
