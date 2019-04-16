@@ -1,4 +1,4 @@
-package tests
+package mocks
 
 import "github.com/diogox/REST-JWT/server/pkg/models"
 

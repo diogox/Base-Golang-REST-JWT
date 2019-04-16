@@ -1,11 +1,9 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
-	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
-	"github.com/diogox/REST-JWT/server/pkg/routes/tests"
+	"github.com/diogox/REST-JWT/server/pkg/routes/mocks"
 	"github.com/labstack/echo"
 	"github.com/magiconair/properties/assert"
 	"net/http"
@@ -14,46 +12,112 @@ import (
 	"testing"
 )
 
+const loginEndpoint = "/api/auth/login"
+const loginMethod = http.MethodPost
+
 var (
+	// Valid Credential to use
 	newLogin = auth.LoginCredentials{
 		Username: "username",
 		Password: "password",
+	}
+
+	loginInvalidPassword = "invalidPassword"
+
+	// Testing table
+	loginTT = []struct {
+		name                 string
+		isRegisteredUsername bool
+		hasVerifiedEmail     bool
+		isUsingValidPassword bool
+		isUsingValidRequest  bool
+		expectedStatusCode   int
+	}{
+		{
+			name:                 "Sucessful Login",
+			isRegisteredUsername: true,
+			hasVerifiedEmail:     true,
+			isUsingValidPassword: true,
+			isUsingValidRequest:  true,
+			expectedStatusCode:   http.StatusOK,
+		},
+		{
+			name:                 "Invalid Password Fails",
+			isRegisteredUsername: true,
+			hasVerifiedEmail:     true,
+			isUsingValidPassword: false,
+			isUsingValidRequest:  true,
+			expectedStatusCode:   http.StatusUnauthorized,
+		},
+		{
+			name:                 "Unverified Email Fails",
+			isRegisteredUsername: true,
+			hasVerifiedEmail:     false,
+			isUsingValidPassword: true,
+			isUsingValidRequest:  true,
+			expectedStatusCode:   http.StatusUnauthorized,
+		},
+		{
+			name:                 "Unregistred User Fails",
+			isRegisteredUsername: false,
+			hasVerifiedEmail:     true,
+			isUsingValidPassword: true,
+			isUsingValidRequest:  true,
+			expectedStatusCode:   http.StatusUnauthorized,
+		},
+		{
+			name:                 "Invalid Request Fails",
+			isRegisteredUsername: false,
+			hasVerifiedEmail:     true,
+			isUsingValidPassword: true,
+			isUsingValidRequest:  false,
+			expectedStatusCode:   http.StatusBadRequest,
+		},
 	}
 )
 
 func TestLogin(t *testing.T) {
 
-	// Setup
-	e := echo.New()
+	// For each test in the testing table
+	for _, tc := range loginTT {
+		t.Run(tc.name, func(t *testing.T) {
 
-	reqJSON, _ := json.Marshal(newRegistration)
+			// Setup
+			e := SetupTestServer()
 
-	req := httptest.NewRequest(http.MethodPost, "/api/auth/login", strings.NewReader(string(reqJSON)))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+			// Create mock db
+			db := mocks.NewMockDb()
 
-	opts := RouteOptions{
-		PrismaHost: "localhost",
-		RedisHost:  "localhost",
-		JWTSecret:  []byte("SuperSecretSecret"),
+			// Register user so that the login is valid
+			if tc.isRegisteredUsername {
+				RegisterTestUser(db, newLogin, tc.hasVerifiedEmail)
+			}
+
+			// Define credentials
+			creds := newLogin
+			if !tc.isUsingValidPassword {
+
+				// Use invalid password instead
+				creds.Password = loginInvalidPassword
+			}
+
+			if !tc.isUsingValidRequest {
+
+				// Use invalid field value
+				creds.Password = "" // This field is required, therefore, this should fail
+			}
+
+			// Marshal credentials
+			reqJSON, _ := json.Marshal(creds)
+
+			req := httptest.NewRequest(loginMethod, loginEndpoint, strings.NewReader(string(reqJSON)))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+
+			// Assertions
+			assert.Equal(t, loginHandler(c, db, mocks.NewMockInMemoryDB()), nil)
+			assert.Equal(t, rec.Code, tc.expectedStatusCode)
+		})
 	}
-	SetupRoutes(e, opts)
-
-	db := tests.NewMockDb()
-
-	// TODO: THe problem here is that the password gets compared against the hashed version,
-	//  and in the mock db, we're saving it as plain text.
-	user, _ := db.CreateUser(context.Background(), &auth.NewRegistration{
-		Email: "email@email.com",
-		Username: "username",
-		Password: "password",
-	})
-	_, _ = db.UpdateUserByID(context.Background(), user.ID, &models.User{
-		IsEmailVerified: true,
-	})
-
-	// Assertions
-	assert.Equal(t, loginHandler(c, tests.NewMockDb(), tests.NewMockInMemoryDB()), nil)
-	assert.Equal(t, rec.Code, http.StatusOK)
 }

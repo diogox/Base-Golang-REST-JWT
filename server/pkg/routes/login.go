@@ -1,13 +1,14 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
 )
 
 // TODO: Need to check refresh token whitelist for previous entries for a given user, if it exists,
@@ -74,8 +75,8 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 
 	// Generate encoded token and send it as response.
 	opts := token.AuthTokenOptions{
-		JWTSecret: jwtSecret,
-		Username: user.Username,
+		JWTSecret:         jwtSecret,
+		Username:          user.Username,
 		DurationInMinutes: tokenDurationInMinutes,
 	}
 
@@ -90,8 +91,8 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 
 	// Generate refresh token
 	refreshOpts := token.RefreshTokenOptions{
-		JWTSecret: jwtSecret,
-		UserId: user.ID,
+		JWTSecret:         jwtSecret,
+		UserId:            user.ID,
 		DurationInMinutes: tokenDurationInMinutes,
 	}
 
@@ -107,13 +108,13 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	// Add the refresh token to the whitelist (and make it expire after a determined amount of time)
 	err = whitelist.Set(refreshtokenStr, tokenDurationInMinutes)
 	if err != nil {
-		panic(err)
+		logger.Error(err.Error())
 	}
 
 	// Create response
 	res := auth.LoginResponse{
-		AuthToken: tokenStr,
-		RefreshToken: refreshtokenStr,
+		AuthToken:                   tokenStr,
+		RefreshToken:                refreshtokenStr,
 		ExpirationIntervalInMinutes: tokenDurationInMinutes,
 	}
 

@@ -1,16 +1,16 @@
-package tests
+package mocks
 
 import "github.com/pkg/errors"
 
-func NewMockInMemoryDB() InMemoryDB {
-	return InMemoryDB{}
+func NewMockInMemoryDB() *InMemoryDB {
+	return &InMemoryDB{}
 }
 
 type InMemoryDB struct {
 	items []string
 }
 
-func (im InMemoryDB) Get(tokenStr string) (string, error) {
+func (im *InMemoryDB) Get(tokenStr string) (string, error) {
 	for _, item := range im.items {
 		if item == tokenStr {
 			return item, nil
@@ -20,7 +20,7 @@ func (im InMemoryDB) Get(tokenStr string) (string, error) {
 	return "", errors.New("item not found")
 }
 
-func (im InMemoryDB) Set(value string, valueDurationInMinutes int) error {
+func (im *InMemoryDB) Set(value string, valueDurationInMinutes int) error {
 	for _, item := range im.items {
 		if item == value {
 			return errors.New("already exists")
@@ -31,7 +31,7 @@ func (im InMemoryDB) Set(value string, valueDurationInMinutes int) error {
 	return nil
 }
 
-func (im InMemoryDB) Del(tokenStr string) (int64, error) {
+func (im *InMemoryDB) Del(tokenStr string) (int64, error) {
 	for i, item := range im.items {
 		if item == tokenStr {
 			im.items = append(im.items[:i], im.items[i+1:]...)
@@ -41,4 +41,3 @@ func (im InMemoryDB) Del(tokenStr string) (int64, error) {
 
 	return 0, errors.New("not found")
 }
-

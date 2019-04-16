@@ -19,17 +19,23 @@ RUN sed -i 's/localhost:4467/prisma:4467/g' prisma.yml
 
 RUN dep ensure -v
 
+# Build website
+WORKDIR ./web
+RUN npm run build
+WORKDIR ./..
+
 # Build smallest binary possible
 RUN go build -o rest-server -ldflags="-s -w" server/cmd/main.go
 
 # Compress binary even further
-RUN apt-get install -y upx
-RUN upx --brute rest-server
+#RUN apt-get install -y upx
+#RUN upx --brute rest-server
 
 # Make smaller image with just the executable
-#FROM alpine
-#COPY --from=build rest-server /rest-server
+FROM alpine
+COPY --from=build /go/src/github.com/diogox/REST-JWT/rest-server /server/rest-server
+COPY --from=build /go/src/github.com/diogox/REST-JWT/web/build /web/build/
 
 EXPOSE 8090
 
-CMD ["./rest-server"]
+CMD ["/server/rest-server"]

@@ -64,7 +64,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.Validator = newValidator()
 
 	// Serve website
-	e.File("/*", "../web/index.html")
+	e.File("/*", "./web/build/index.html")
 	e.File("/favicon.ico", "../web/images/favicon.ico")
 
 	// By default, the key is extracted from the header "Authorization".
