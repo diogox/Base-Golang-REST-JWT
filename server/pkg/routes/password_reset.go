@@ -57,8 +57,8 @@ func sendPasswordResetEmail(c echo.Context) error {
 
 	// Generate encoded token and send it as response.
 	opts := token.PasswordResetTokenOptions{
-		JWTSecret: jwtSecret,
-		UserId: reqUser.ID,
+		JWTSecret:         jwtSecret,
+		UserId:            reqUser.ID,
 		DurationInMinutes: tokenDurationInMinutes,
 	}
 
@@ -110,7 +110,7 @@ func resetPassword(c echo.Context) error {
 
 	// Check if the token is valid
 	if !token.AssertAndValidate(tokn, token.PasswordResetToken) {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Message: "Invalid token!",
 		})
 	}
@@ -150,9 +150,21 @@ func resetPassword(c echo.Context) error {
 		})
 	}
 
+	// Get user
+	user, err := db.GetUserByID(ctx, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
 	// Update user to have the new password
 	_, err = db.UpdateUserByID(ctx, userId, &models.User{
-		Password: string(hashedPassword),
+		ID:              user.ID,
+		Email:           user.Email,
+		Username:        user.Username,
+		Password:        string(hashedPassword),
+		IsEmailVerified: user.IsEmailVerified,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{

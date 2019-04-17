@@ -131,7 +131,19 @@ func verifyEmail(c echo.Context) error {
 	userId, _ := claims["user_id"].(string)
 
 	// Update user to have email verified
+	user, err := db.GetUserByID(ctx, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	// Update user to have email verified
 	updatedUser := models.User{
+		ID: user.ID,
+		Email: user.Email,
+		Username: user.Username,
+		Password: user.Password,
 		IsEmailVerified: true,
 	}
 

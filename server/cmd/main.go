@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/gommon/log"
 	echoLog "github.com/neko-neko/echo-logrus/log"
 	"github.com/spf13/cobra"
+	"net/http"
 	"os"
 )
 
@@ -42,6 +43,15 @@ func main() {
 			middleware.Recover(),
 			//middleware.HTTPSRedirect(),
 		)
+
+		// TODO: Do I need this?
+		// CORS restricted
+		// Allows requests from any `https://labstack.com` or `https://labstack.net` origin
+		// wth GET, PUT, POST or DELETE method.
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		}))
 
 		// Routes
 		opts := routes.RouteOptions{
