@@ -65,7 +65,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Serve website
 	e.File("/*", "./web/build/index.html")
-	e.File("/favicon.ico", "../web/images/favicon.ico")
+	//e.File("/favicon.ico", "../web/images/favicon.ico")
 
 	// By default, the key is extracted from the header "Authorization".
 	// To get it from a field named `token` in the JSON we could add `TokenLookup: "query:token"` to the JWT Configs

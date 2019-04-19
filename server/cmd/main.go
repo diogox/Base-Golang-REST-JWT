@@ -49,7 +49,7 @@ func main() {
 		// Allows requests from any `https://labstack.com` or `https://labstack.net` origin
 		// wth GET, PUT, POST or DELETE method.
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins: []string{"*"},
+			AllowOrigins: []string{"http://localhost:" + app.Port},
 			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 		}))
 
