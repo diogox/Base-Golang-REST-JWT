@@ -44,9 +44,8 @@ func main() {
 			//middleware.HTTPSRedirect(),
 		)
 
-		// TODO: Do I need this?
 		// CORS restricted
-		// Allows requests from any `https://labstack.com` or `https://labstack.net` origin
+		// Allows requests from `localhost` aand the specified port.
 		// wth GET, PUT, POST or DELETE method.
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: []string{"http://localhost:" + app.Port},

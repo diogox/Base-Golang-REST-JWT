@@ -6,7 +6,25 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"net/http"
+	"strings"
 )
+
+func normalizeEmail(email string) string {
+	parts := strings.Split(email, "@")
+	address := parts[0]
+	domain := parts[1]
+
+	switch domain {
+	case "gmail.com":
+		// All dots in the address are ignored by gmail
+		// We remove the dots here to avoid users duplicating accounts with the same email address
+		cleanAddress := strings.Replace(address, ".", "", -1)
+		return cleanAddress + domain
+	}
+
+	// No changes needed to be made
+	return email
+}
 
 func sendVerificationEmail(c echo.Context) error {
 
@@ -36,6 +54,9 @@ func sendVerificationEmail(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+
+	// Normalize email
+	req.Email = normalizeEmail(req.Email)
 
 	// Get user
 	reqUser, err := db.GetUserByEmail(ctx, req.Email)

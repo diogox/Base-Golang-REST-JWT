@@ -55,7 +55,7 @@ func registerHandler(c echo.Context, db server.SqlDB, emailService server.EmailS
 
 	// Create user
 	newUser, err := db.CreateUser(ctx, &auth.NewRegistration{
-		Email:    req.Email,
+		Email:    normalizeEmail(req.Email),
 		Username: req.Username,
 		Password: string(hashedPassword),
 	})
