@@ -13,7 +13,7 @@ export default class LoginPage extends Component<any> {
 
         login(this.state.username,this.state.password)
             .then((res: JSON) =>{
-               this.props.history.replace('/');
+               this.props.history.replace('/dashboard');
             })
             .catch((err: Error) =>{
                 this.setState({
@@ -65,7 +65,7 @@ export default class LoginPage extends Component<any> {
                         </div>
                         <div className="flex items-center justify-between">
                             <button className={btnStyles} type="submit">
-                                Sign In
+                                Login
                             </button>
                             <a className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker" href="#">
                                 Forgot Password?

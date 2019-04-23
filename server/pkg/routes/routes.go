@@ -64,9 +64,9 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.Validator = newValidator()
 
 	// Serve website
-	e.Static("/static", "./web/build/static")
 	e.File("/*", "./web/build/index.html")
 	//e.File("/favicon.ico", "../web/images/favicon.ico")
+	e.Static("/static", "./web/build/static")
 
 	// By default, the key is extracted from the header "Authorization".
 	// To get it from a field named `token` in the JSON we could add `TokenLookup: "query:token"` to the JWT Configs

@@ -1,7 +1,9 @@
 import React from 'react'
 
 const DashboardPage: React.FunctionComponent = () => (
-    <p>Dashboard</p>
+    <div className="h-screen bg-grey-lighter">
+        <p>Dashboard</p>
+    </div>
 )
 
 export default DashboardPage

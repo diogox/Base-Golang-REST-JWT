@@ -7,6 +7,7 @@ import App from './components/App'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
+import SharedRoute from './routes/SharedRoute'
 import PrivateRoute from './routes/PrivateRoute'
 import PublicRoute from './routes/PublicRoute'
 import * as serviceWorker from './serviceWorker'
@@ -14,7 +15,7 @@ import * as serviceWorker from './serviceWorker'
 ReactDOM.render(
     <Router>
         <Switch>
-            <PublicRoute exact path='/' component={App} />
+            <SharedRoute exact path='/' component={App} />
             <PublicRoute exact path='/login' component={LoginPage} />
             <PrivateRoute exact path='/dashboard' component={DashboardPage} />
             <Route path="" component={NotFoundPage} />

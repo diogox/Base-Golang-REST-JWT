@@ -14,11 +14,12 @@ const PublicRoute = ({ component: Component, ...rest }) => (
           pathname: 'dashboard',
           state: { from: props.location }
       }} />
+      
     // Return the component
     : <React.Fragment>
-      <NavBar isLoggedIn={false} />
-      <Component {...props} /> 
-    </React.Fragment>
+        <NavBar isLoggedIn={false} />
+        <Component {...props} /> 
+      </React.Fragment>
   )} />
 );
 
