@@ -33,6 +33,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "purgecss": "^1.3.0",
     "tailwindcss": "^0.7.4"
   }
 }

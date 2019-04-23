@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { login } from '../../utils/AuthService';
+import React, { Component } from 'react'
+import { login } from '../../utils/AuthService'
 
 export default class LoginPage extends Component<any> {
     state = {
@@ -39,9 +39,10 @@ export default class LoginPage extends Component<any> {
                             </label>
 
                             {/* Username Input */}
-                            <input className={inputStyles} value={this.state.username} onChange={(ev) => {
-                                this.setState({ username: ev.target.value })
-                            }} />
+                            <input 
+                                className={inputStyles} 
+                                value={this.state.username} 
+                                onChange={(ev) => this.setState({ username: ev.target.value })} />
                         </div>
                         <div className="mb-6">
                             <label className={labelStyles}>
@@ -49,12 +50,18 @@ export default class LoginPage extends Component<any> {
                             </label>
 
                             {/* Password Input */}
-                            <input className={inputStyles} type="password" value={this.state.password} onChange={(ev) => {
-                                this.setState({ password: ev.target.value })
-                            }} />
+                            <input 
+                                className={inputStyles} 
+                                type="password" 
+                                value={this.state.password} 
+                                onChange={(ev) => this.setState({ password: ev.target.value })} />
 
                             {/* Error Message */}
-                            { this.state.errorMsg != '' ? <p className="text-red text-xs italic">{this.state.errorMsg}</p> : undefined }
+                            { 
+                                this.state.errorMsg != '' ? 
+                                    <p className="text-red text-xs italic">{this.state.errorMsg}</p> 
+                                    : undefined 
+                            }
                         </div>
                         <div className="flex items-center justify-between">
                             <button className={btnStyles} type="submit">
@@ -67,6 +74,6 @@ export default class LoginPage extends Component<any> {
                     </form>
                 </div>
             </div>
-        );
+        )
     }
 }
