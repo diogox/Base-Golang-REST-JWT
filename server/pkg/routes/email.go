@@ -76,8 +76,8 @@ func sendVerificationEmail(c echo.Context) error {
 
 	// Generate encoded token and send it as response.
 	opts := token.EmailVerificationTokenOptions{
-		JWTSecret: jwtSecret,
-		UserId: reqUser.ID,
+		JWTSecret:         jwtSecret,
+		UserId:            reqUser.ID,
 		DurationInMinutes: tokenDurationInMinutes,
 	}
 

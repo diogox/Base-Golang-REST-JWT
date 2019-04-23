@@ -64,6 +64,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.Validator = newValidator()
 
 	// Serve website
+	e.Static("/static", "./web/build/static")
 	e.File("/*", "./web/build/index.html")
 	//e.File("/favicon.ico", "../web/images/favicon.ico")
 

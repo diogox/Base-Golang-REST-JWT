@@ -48,7 +48,8 @@ func main() {
 		// Allows requests from `localhost` aand the specified port.
 		// wth GET, PUT, POST or DELETE method.
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins: []string{"http://localhost:" + app.Port},
+			//AllowOrigins: []string{"http://localhost:" + app.Port},
+			AllowOrigins: []string{"*"},
 			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 		}))
 
