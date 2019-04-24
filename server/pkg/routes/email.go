@@ -19,7 +19,7 @@ func normalizeEmail(email string) string {
 		// All dots in the address are ignored by gmail
 		// We remove the dots here to avoid users duplicating accounts with the same email address
 		cleanAddress := strings.Replace(address, ".", "", -1)
-		return cleanAddress + domain
+		return cleanAddress + "@" + domain
 	}
 
 	// No changes needed to be made

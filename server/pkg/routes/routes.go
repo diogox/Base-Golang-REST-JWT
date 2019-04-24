@@ -89,7 +89,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 			return nil
 		}
 
-		// Return both middlewares
+		// Return both middleware
 		jwtMiddleware := middleware.JWT(jwtSecret)
 		return jwtMiddleware(f)
 	}

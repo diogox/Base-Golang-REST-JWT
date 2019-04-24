@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom'
+import {RouteComponentProps} from "react-router"
+import { Link } from 'react-router-dom'
 import { logout } from '../../utils/AuthService'
 
 interface Route {
@@ -8,59 +10,67 @@ interface Route {
     action?: () => void,
 }
 
-const authedRoutes: Route[] = [
-    {
-        title: "My Dashboard",
-        route: "/dashboard",
-    },
-    {
-        title: "Logout",
-        route: "/",
-        action: () => logout(),
-    },
-]
-
-const unAuthedRoutes: Route[] = [
-    {
-        title: "Login",
-        route: "/login",
-    },
-    {
-        title: "Signup",
-        route: "/signup",
-    },
-]
-
-const LinkMaker = (title: string, route?: string, action?: () => void) => {
-    if (route === undefined) {
-        return
-    }
-
-    return (
-        <Link to={route}>
-            {
-                action !== undefined?
-                <a onClick={action}
-                   className="block mt-4 lg:inline-block lg:mt-0 text-grey hover:text-grey-darker ml-4 cursor-pointer">
-                        { title }
-                </a>
-                : <a className="block mt-4 lg:inline-block lg:mt-0 text-grey hover:text-grey-darker ml-4 cursor-pointer">
-                      { title }
-                  </a>
-            }
-            
-        </Link>
-    )
-}
-
-interface NavProps {
+type NavProps = RouteComponentProps & {
     isLoggedIn: boolean,
     location: Location,
 }
 
-export default class NavBar extends Component<NavProps> {
+class NavBar extends Component<NavProps> {
     constructor(props: NavProps) {
         super(props)
+    }
+
+    authedRoutes: Route[] = [
+        {
+            title: "My Dashboard",
+            route: "/dashboard",
+        },
+        {
+            title: "Logout",
+            action: () => {
+                logout()
+                this.props.history.push('/')
+            },
+        },
+    ]
+    
+    unAuthedRoutes: Route[] = [
+        {
+            title: "Login",
+            route: "/login",
+        },
+        {
+            title: "Signup",
+            route: "/signup",
+        },
+    ]
+
+    
+    _renderLink = (title: string, route?: string, action?: () => void) => {
+        // Check if it's the currently selected one
+        let isActiveStyle = this.props.location.pathname === route? 'text-grey-darker' : 'text-grey'
+        let linkStyle = "block no-underline mt-4 lg:inline-block lg:mt-0 hover:text-grey-darker ml-4 cursor-pointer " + isActiveStyle
+        
+        // If there's an action, it's not linking anywhere
+        if (action !== undefined) {
+            return (
+                <a onClick={action} className={linkStyle}>
+                        { title }
+                </a>
+            )
+        }
+        
+        // Check if route exists
+        if (route === undefined) {
+            return
+        }
+
+        // Link to another route
+        return (
+            <Link to={route} className={linkStyle}>
+                { title }
+            </Link>
+        )
     }
 
     render() {
@@ -68,7 +78,7 @@ export default class NavBar extends Component<NavProps> {
             <nav className="flex items-center justify-between flex-wrap p-5 mt-2">
                 <div className="flex items-center flex-no-shrink text-white mr-6 ml-6">
                     <Link to="/" style={{ textDecoration: 'none' }}>
-                        <span className="font-semibold text-xl tracking-tight text-grey-darkest">Logo  - {console.log(this.props.location)}</span>
+                        <span className="font-semibold text-xl tracking-tight text-grey-darkest">Logo</span>
                     </Link>
                 </div>
                 <div className="block lg:hidden">
@@ -80,8 +90,8 @@ export default class NavBar extends Component<NavProps> {
                     <div className="text-sm lg:flex-grow text-right mr-6">
                         {
                             this.props.isLoggedIn ?
-                                authedRoutes.map((obj: Route) => LinkMaker(obj.title, obj.route, obj.action))
-                                : unAuthedRoutes.map((obj: Route) => LinkMaker(obj.title, obj.route, obj.action))
+                                this.authedRoutes.map((obj: Route) => this._renderLink(obj.title, obj.route, obj.action))
+                                : this.unAuthedRoutes.map((obj: Route) => this._renderLink(obj.title, obj.route, obj.action))
                         }
                         {/*
                             <Link to="/about">
@@ -101,3 +111,5 @@ export default class NavBar extends Component<NavProps> {
         )
     }
 }
+
+export default withRouter(NavBar)

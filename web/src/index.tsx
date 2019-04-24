@@ -6,6 +6,7 @@ import './css/tailwind.css'
 import App from './components/App'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
 import NotFoundPage from './pages/NotFoundPage'
 import SharedRoute from './routes/SharedRoute'
 import PrivateRoute from './routes/PrivateRoute'
@@ -17,8 +18,9 @@ ReactDOM.render(
         <Switch>
             <SharedRoute exact path='/' component={App} />
             <PublicRoute exact path='/login' component={LoginPage} />
+            <PublicRoute exact path='/signup' component={SignupPage} />
             <PrivateRoute exact path='/dashboard' component={DashboardPage} />
-            <Route path="" component={NotFoundPage} />
+            <SharedRoute path="" component={NotFoundPage} />
         </Switch>
     </Router>
     , document.getElementById('root')

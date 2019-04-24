@@ -16,6 +16,20 @@ export const login = (username: string, password: string) => {
     })
 }
 
+export const signup = (email: string, username: string, password: string) => {
+    // Get a token from api server using the fetch api
+    return request(`http://localhost:8090/api/auth/register`, {
+        method: 'POST',
+        body: JSON.stringify({
+            email,
+            username,
+            password
+        })
+    }).then(res => {
+        return Promise.resolve(res)
+    })
+}
+
 export const loggedIn = () => {
     // Checks if there is a saved token and it's still valid
     const token = getToken() // Getting token from localstorage
