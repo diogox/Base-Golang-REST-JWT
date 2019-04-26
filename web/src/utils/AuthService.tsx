@@ -14,7 +14,7 @@ export const login = (username: string, password: string) => {
         setToken(res.auth_token) // Setting the token in localStorage
         return Promise.resolve(res)
     })
-}
+};
 
 export const signup = (email: string, username: string, password: string) => {
     // Get a token from api server using the fetch api
@@ -28,11 +28,70 @@ export const signup = (email: string, username: string, password: string) => {
     }).then(res => {
         return Promise.resolve(res)
     })
-}
+};
+
+export const sendVerificationEmail = (email: string) => {
+    // Get a token from api server using the fetch api
+    return request(`http://localhost:8090/api/auth/verify`, {
+        method: 'POST',
+        body: JSON.stringify({
+            email
+        })
+    }).then(res => {
+        return Promise.resolve(res)
+    })
+};
+
+export const verifyEmail = (token: string) => {
+    // Get a token from api server using the fetch api
+    return fetch(`http://localhost:8090/api/auth/verify/${token}`, {
+        method: 'GET',
+    }).then(res => {
+        return Promise.resolve(res)
+    })
+};
+
+export const sendResetPasswordEmail = (email: string) => {
+    // Get a token from api server using the fetch api
+    const headers: { [key:string]:string } = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+
+    return fetch('http://localhost:8090/api/auth/reset-password', {
+        headers,
+        method: 'POST',
+        body: JSON.stringify({
+            email
+        })
+    }).then(_checkStatus)
+      .then(res => {
+        return Promise.resolve(res)
+    })
+};
+
+export const resetPassword = (token: string, password: string) => {
+    // Get a token from api server using the fetch api
+    const headers: { [key:string]:string } = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+
+    return fetch(`http://localhost:8090/api/auth/reset-password/${token}`, {
+        headers,
+        method: 'POST',
+        body: JSON.stringify({
+            password
+        })
+    }).then(_checkStatus)
+      .then(res => {
+        return Promise.resolve(res)
+    })
+};
 
 export const loggedIn = () => {
     // Checks if there is a saved token and it's still valid
-    const token = getToken() // Getting token from localstorage
+    const token = getToken(); // Getting token from localstorage
 
     // If there's no value, return
     if (token === undefined) {
@@ -41,13 +100,13 @@ export const loggedIn = () => {
 
     // Check validity
     return (!!token) && !isTokenExpired(token)
-}
+};
 
 // The model for the token received
 interface TokenType {
     exp: number,
     auth_token: string,
-};
+}
 
 const isTokenExpired = (token: string) => {
     try {
@@ -61,7 +120,7 @@ const isTokenExpired = (token: string) => {
     catch (err) {
         return false
     }
-}
+};
 
 // Saves user token to localStorage
 const setToken = (authToken: string) => localStorage.setItem(AUTH_TOKEN_KEY, authToken)
@@ -79,14 +138,14 @@ export const getProfile = () => {
     if (token !== null) {
         return decode(token as string)
     }
-}
+};
 
 const request = (url: string, options: any) => {
-    // performs api calls sending the required authentication headers
+    // Performs api calls sending the required authentication headers
     const headers: { [key:string]:string } = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-    }
+    };
 
     // Setting Authorization header
     // Authorization: Bearer xxxxxxx.xxxxxxxx.xxxxxx
@@ -100,10 +159,10 @@ const request = (url: string, options: any) => {
     })
         .then(_checkStatus)
         .then(response => response.json())
-}
+};
 
 const _checkStatus = (response: Response) => {
-    // raises an error in case response status is not a success
+    // Raises an error in case response status is not a success
     if (response.status >= 200 && response.status < 300) { // Success status lies between 200 to 300
         return response
     } else {

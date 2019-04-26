@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { signup } from '../../utils/AuthService'
 import MessageBar, { MessageType } from '../../components/MessageBar'
+import {Link} from "react-router-dom";
 
 export default class SignupPage extends Component<any> {
     state = {
@@ -9,7 +10,7 @@ export default class SignupPage extends Component<any> {
         password: '',
         errorMsg: '',
         successMsg: '',
-    }
+    };
 
     handleSubmit = (ev: React.SyntheticEvent<any>) => {
         ev.preventDefault();
@@ -21,12 +22,11 @@ export default class SignupPage extends Component<any> {
                 })
             })
             .catch((err: Error) =>{
-                console.log(err)
                 this.setState({
                     errorMsg: err.message,
                 })
             })
-    }
+    };
 
     render() {
         const formStyles = "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4";
@@ -39,7 +39,7 @@ export default class SignupPage extends Component<any> {
                 <div className="flex justify-center">
                     <form className={formStyles} onSubmit={this.handleSubmit}>
                         {
-                            this.state.successMsg != '' ? 
+                            this.state.successMsg !== '' ?
                                 <div className="mb-4 p-4">
                                     <MessageBar title="Success!" message={this.state.successMsg} type={MessageType.Success} />
                                 </div> 
@@ -92,6 +92,9 @@ export default class SignupPage extends Component<any> {
                             <button className={btnStyles} type="submit">
                                 Signup
                             </button>
+                            <Link to="login" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
+                                Already have an account?
+                            </Link>
                         </div>
                     </form>
                 </div>

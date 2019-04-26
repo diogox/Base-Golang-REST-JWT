@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
-import {RouteComponentProps} from "react-router"
+import { RouteComponentProps } from "react-router"
 import { Link } from 'react-router-dom'
 import { logout } from '../../utils/AuthService'
 

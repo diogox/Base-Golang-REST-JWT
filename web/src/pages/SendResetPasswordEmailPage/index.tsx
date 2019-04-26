@@ -1,28 +1,29 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { login } from '../../utils/AuthService'
+import { sendResetPasswordEmail } from '../../utils/AuthService'
 
 export default class SendResetPasswordEmailPage extends Component<any> {
     state = {
-        username: '',
-        password: '',
+        email: '',
         errorMsg: '',
-    }
+        successMsg: '',
+    };
 
     handleSubmit = (ev: React.SyntheticEvent<any>) => {
         ev.preventDefault();
 
-        login(this.state.username,this.state.password)
-            .then((res: JSON) =>{
-               this.props.history.replace('/dashboard');
+        sendResetPasswordEmail(this.state.email)
+            .then((res: Response) =>{
+                this.setState({
+                    successMsg: 'Reset password email sent!',
+                })
             })
             .catch((err: Error) =>{
                 this.setState({
                     errorMsg: err.message,
-                });
-                (err);
+                })
             })
-    }
+    };
 
     render() {
         const formStyles = "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4";
@@ -34,48 +35,39 @@ export default class SendResetPasswordEmailPage extends Component<any> {
             <div className="container mx-auto m-5">
                 <div className="flex justify-center">
                     <form className={formStyles} onSubmit={this.handleSubmit}>
-                        <div className="mb-4">
-                            <label className={labelStyles}>
-                                Username
-                            </label>
-
-                            {/* Username Input */}
-                            <input 
-                                className={inputStyles} 
-                                value={this.state.username} 
-                                onChange={(ev) => this.setState({ username: ev.target.value })} />
-                        </div>
                         <div className="mb-6">
                             <label className={labelStyles}>
-                                Password
+                                Email
                             </label>
 
-                            {/* Password Input */}
+                            {/* Email Input */}
                             <input 
                                 className={inputStyles} 
-                                type="password" 
-                                value={this.state.password} 
-                                onChange={(ev) => this.setState({ password: ev.target.value })} />
+                                type="email" 
+                                value={this.state.email} 
+                                onChange={(ev) => this.setState({ email: ev.target.value })} />
 
                             {/* Error Message */}
                             { 
-                                this.state.errorMsg != '' ? 
+                                this.state.errorMsg !== '' ?
                                     <p className="text-red text-xs italic">{this.state.errorMsg}</p> 
+                                    : undefined 
+                            }
+
+                            {/* Success Message */}
+                            { 
+                                this.state.successMsg !== '' ?
+                                    <p className="text-green text-xs italic">{this.state.successMsg}</p> 
                                     : undefined 
                             }
                         </div>
                         <div className="flex items-center justify-between">
                             <button className={btnStyles} type="submit">
-                                Login
+                                Reset Password
                             </button>
-                            <div className="flex flex-col">
-                                <Link to="reset-password" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
-                                    Forgot Password?
-                                </Link>
-                                <Link to="verify" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
-                                    Resend Verification Email
-                                </Link>
-                            </div>
+                            <Link to="login" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker">
+                                Remember the password?
+                            </Link>
                         </div>
                     </form>
                 </div>
