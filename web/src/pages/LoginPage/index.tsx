@@ -7,7 +7,7 @@ export default class SendResetPasswordEmailPage extends Component<any> {
         username: '',
         password: '',
         errorMsg: '',
-    }
+    };
 
     handleSubmit = (ev: React.SyntheticEvent<any>) => {
         ev.preventDefault();
@@ -20,14 +20,13 @@ export default class SendResetPasswordEmailPage extends Component<any> {
                 this.setState({
                     errorMsg: err.message,
                 });
-                (err);
             })
     }
 
     render() {
         const formStyles = "bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4";
         const labelStyles = "block text-grey-darker text-sm font-bold mb-2";
-        const inputStyles = "shadow appearance-none border rounded w-full py-2 px-3 text-grey-darker leading-tight focus:outline-none focus:shadow-outline";
+        const inputStyles = "shadow appearance-none border rounded w-full py-2 px-3 text-grey-darker leading-tight focus:outline-none focus:shadow-outline bg-grey-lightest";
         const btnStyles = "bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline";
 
         return (

@@ -1,0 +1,4 @@
+export const LOGIN = "LOGIN";
+export const REGISTER = "REGISTER";
+export const RESEND_VERIFICATION_EMAIL = "RESEND_VERIFICATION_EMAIL";
+export const VERIFY_EMAIL = "VERIFY_EMAIL";

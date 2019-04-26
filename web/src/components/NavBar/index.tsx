@@ -54,7 +54,7 @@ class NavBar extends Component<NavProps> {
         // If there's an action, it's not linking anywhere
         if (action !== undefined) {
             return (
-                <a onClick={action} className={linkStyle}>
+                <a onClick={action} className={linkStyle} key={'key-' + title}>
                         { title }
                 </a>
             )
@@ -67,7 +67,7 @@ class NavBar extends Component<NavProps> {
 
         // Link to another route
         return (
-            <Link to={route} className={linkStyle}>
+            <Link to={route} className={linkStyle} key={route}>
                 { title }
             </Link>
         )
