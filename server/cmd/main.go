@@ -45,17 +45,18 @@ func main() {
 		)
 
 		// CORS restricted
-		// Allows requests from `localhost` aand the specified port.
+		// Allows requests from `localhost` and the specified port.
 		// wth GET, PUT, POST or DELETE method.
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			//AllowOrigins: []string{"http://localhost:" + app.Port},
-			AllowOrigins: []string{"*"},
+			AllowOrigins: []string{app.AppUrl},
 			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 		}))
 
 		// Routes
 		opts := routes.RouteOptions{
 			// Server Configs
+			AppUrl: app.AppUrl,
 			JWTSecret: []byte(app.JWTSecret),
 			TokenDurationInMinutes: app.JWTDuration,
 

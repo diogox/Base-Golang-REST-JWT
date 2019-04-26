@@ -101,7 +101,7 @@ func sendVerificationEmail(c echo.Context) error {
 	// Send verification email
 	err = emailService.SendEmail(user, models.NewEmail{
 		Subject: "Registration",
-		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s", user.Username, verificationToken),
+		Message: fmt.Sprintf("Congrats %s you are now a user. Use this token to verify your account: %s", user.Username, AppUrl + "/verify/" + verificationToken),
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{

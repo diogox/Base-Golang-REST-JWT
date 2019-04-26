@@ -7,6 +7,7 @@ import (
 
 const (
 	// Server Config
+	AppUrlEnv      = "APP_URL"
 	PortEnv        = "PORT"
 	JWTSecretEnv   = "JWT_SECRET"
 	JWTDurationEnv = "JWT_DURATION"
@@ -25,6 +26,7 @@ const (
 
 var (
 	// Server Config
+	AppUrl      string
 	Port        string
 	JWTSecret   string
 	JWTDuration int
@@ -52,6 +54,9 @@ func init() {
 	viper.AutomaticEnv()
 
 	/* Server Configuration */
+
+	// Get url
+	Cmd.PersistentFlags().StringVarP(&AppUrl, "app-url", "u", viper.GetString(AppUrlEnv), "Set the app's url to be used")
 
 	// Get port
 	Cmd.PersistentFlags().StringVarP(&Port, "port", "p", viper.GetString(PortEnv), "Set the port to be used")
@@ -82,5 +87,4 @@ func init() {
 
 	// Get email service username
 	Cmd.PersistentFlags().StringVarP(&EmailPassword, "email-password", "", viper.GetString(EmailPasswordEnv), "Set the email service's password")
-
 }

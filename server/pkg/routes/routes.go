@@ -13,6 +13,7 @@ import (
 	"net/http"
 )
 
+var AppUrl string
 var db server.SqlDB
 var refreshTokenWhitelist server.InMemoryDB
 var emailService server.EmailService
@@ -21,6 +22,7 @@ var tokenDurationInMinutes int
 
 type RouteOptions struct {
 	// Server Configs
+	AppUrl                 string
 	JWTSecret              []byte
 	TokenDurationInMinutes int
 
@@ -37,6 +39,7 @@ type RouteOptions struct {
 }
 
 func SetupRoutes(e *echo.Echo, opts RouteOptions) {
+	AppUrl = opts.AppUrl
 
 	// Instantiate Prisma client
 	db = server.SqlDB(database.NewPrismaDB(opts.PrismaHost))
