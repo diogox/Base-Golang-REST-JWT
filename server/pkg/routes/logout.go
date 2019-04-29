@@ -18,7 +18,7 @@ func logoutHandler(c echo.Context, whitelist server.InMemoryDB) error {
 	logger := c.Logger()
 
 	// Get auth's user token
-	userId := c.Get("userID").(string)
+	userId := c.Get(USER_ID_PARAM).(string)
 
 	// Remove the refresh token, for the requesting user, from the whitelist, if it exists.
 	_, err := whitelist.Del(userId)

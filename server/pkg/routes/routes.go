@@ -13,6 +13,8 @@ import (
 	"net/http"
 )
 
+const USER_ID_PARAM = "UserID"
+
 var (
 	AppUrl                        string
 	db                            server.SqlDB
@@ -81,7 +83,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	requireAuth := func(next echo.HandlerFunc) echo.HandlerFunc {
 		// Middleware to check the token is of type `AuthToken`
 		f := func(c echo.Context) error {
-			t := c.Get("user").(*jwt.Token)
+			t := c.Get(USER_ID_PARAM).(*jwt.Token)
 
 			// Check if valid (the jwt middleware already does this, but we might want to do additional checks...)
 			if !token.AssertAndValidate(t, token.AuthToken) {
@@ -124,7 +126,7 @@ func handleGetUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	//logger := c.Logger()
 
-	userID, _ := c.Get("userID").(string)
+	userID, _ := c.Get(USER_ID_PARAM).(string)
 
 	users, err := db.GetUserByID(ctx, userID)
 	if err != nil {
