@@ -34,7 +34,7 @@ var (
 		expectedStatusCode   int
 	}{
 		{
-			name:                 "Sucessful Login",
+			name:                 "Successful Login",
 			isRegisteredUsername: true,
 			hasVerifiedEmail:     true,
 			isUsingValidPassword: true,
