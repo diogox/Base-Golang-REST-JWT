@@ -7,7 +7,6 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"net/http"
-	"time"
 )
 
 func refreshToken(c echo.Context) error {
@@ -43,13 +42,12 @@ func refreshToken(c echo.Context) error {
 
 	// Get expiration time
 	claims := refreshToken.Claims.(jwt.MapClaims)
-	expiration, _ := claims["exp"].(int64)
 	userId, _ := claims["user_id"].(string)
 
 	// Make sure the token hasn't expired
-	if time.Unix(expiration, 0).Sub(time.Now()) > 0*time.Second {
+	if !token.AssertAndValidate(refreshToken, token.RefreshToken) {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Message: "Token still valid for sufficient time. Try again later!",
+			Message: "Invalid Token!",
 		})
 	}
 

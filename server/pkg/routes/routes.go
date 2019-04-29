@@ -81,20 +81,21 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	requireAuth := func(next echo.HandlerFunc) echo.HandlerFunc {
 		// Middleware to check the token is of type `AuthToken`
 		f := func(c echo.Context) error {
-			if err := next(c); err != nil {
-				c.Error(err)
-			}
+			t := c.Get("user").(*jwt.Token)
 
-			tokn := c.Get("user").(*jwt.Token)
-
-			// Check if valid
-			if !token.AssertAndValidate(tokn, token.AuthToken) {
+			// Check if valid (the jwt middleware already does this, but we might want to do additional checks...)
+			if !token.AssertAndValidate(t, token.AuthToken) {
 				return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 					Message: "Invalid Token!",
 				})
 			}
 
-			return nil
+			// Set user id to context
+			claims := t.Claims.(jwt.MapClaims)
+			userID := claims["user_id"].(string)
+			c.Set("userID", userID)
+
+			return next(c)
 		}
 
 		// Return both middleware
@@ -123,12 +124,9 @@ func handleGetUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	//logger := c.Logger()
 
-	tokn := c.Get("user").(*jwt.Token)
+	userID, _ := c.Get("userID").(string)
 
-	claims := tokn.Claims.(jwt.MapClaims)
-	userId := claims["user_id"].(string)
-
-	users, err := db.GetUserByID(ctx, userId)
+	users, err := db.GetUserByID(ctx, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
