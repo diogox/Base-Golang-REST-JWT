@@ -59,7 +59,7 @@ func sendPasswordResetEmail(c echo.Context) error {
 	opts := token.PasswordResetTokenOptions{
 		JWTSecret:         jwtSecret,
 		UserId:            reqUser.ID,
-		DurationInMinutes: tokenDurationInMinutes,
+		DurationInMinutes: authTokenDurationInMinutes,
 	}
 
 	resetToken, err := token.NewPasswordResetToken(opts)

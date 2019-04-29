@@ -7,10 +7,11 @@ import (
 
 const (
 	// Server Config
-	AppUrlEnv      = "APP_URL"
-	PortEnv        = "PORT"
-	JWTSecretEnv   = "JWT_SECRET"
-	JWTDurationEnv = "JWT_DURATION"
+	AppUrlEnv             = "APP_URL"
+	PortEnv               = "PORT"
+	JWTSecretEnv          = "JWT_SECRET"
+	JWTAuthDurationEnv    = "JWT_AUTH_DURATION"
+	JWTRefreshDurationEnv = "JWT_REFRESH_DURATION"
 
 	// Databases Config
 	PrismaHostEnv = "PRISMA_HOST"
@@ -26,10 +27,11 @@ const (
 
 var (
 	// Server Config
-	AppUrl      string
-	Port        string
-	JWTSecret   string
-	JWTDuration int
+	AppUrl             string
+	Port               string
+	JWTSecret          string
+	JWTAuthDuration    int
+	JWTRefreshDuration int
 
 	// Databases Config
 	PrismaHost string
@@ -65,7 +67,8 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&JWTSecret, "jwt-secret", "s", viper.GetString(JWTSecretEnv), "Set the JWT secret to be used")
 
 	// Get jwt duration
-	Cmd.PersistentFlags().IntVarP(&JWTDuration, "jwt-duration", "d", viper.GetInt(JWTDurationEnv), "Set the JWT duration before it needs to be refreshed")
+	Cmd.PersistentFlags().IntVarP(&JWTAuthDuration, "jwt-auth-duration", "t", viper.GetInt(JWTAuthDurationEnv), "Set the JWT Auth Token duration before it needs to be refreshed")
+	Cmd.PersistentFlags().IntVarP(&JWTRefreshDuration, "jwt-refresh-duration", "r", viper.GetInt(JWTRefreshDurationEnv), "Set the JWT Refresh Token duration before it needs to be refreshed")
 
 	/* Databases Configuration */
 	Cmd.PersistentFlags().StringVarP(&PrismaHost, "prisma", "", viper.GetString(PrismaHostEnv), "Set the Host name for the prisma service.")

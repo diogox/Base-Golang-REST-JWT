@@ -22,10 +22,10 @@ type Whitelist struct {
 	client *redis.Client
 }
 
-func (w *Whitelist) Set(tokenStr string, tokenDuration int) error {
+func (w *Whitelist) Set(key string, tokenStr string, tokenDuration int) error {
 	spareTime := 1
 	expiresIn := time.Minute * time.Duration(tokenDuration + spareTime)
-	err := w.client.Set(tokenStr, "", expiresIn).Err()
+	err := w.client.Set(key, tokenStr, expiresIn).Err()
 	if err != nil {
 		return err
 	}
@@ -33,10 +33,10 @@ func (w *Whitelist) Set(tokenStr string, tokenDuration int) error {
 	return nil
 }
 
-func (w *Whitelist) Get(tokenStr string) (string, error) {
-	return w.client.Get(tokenStr).Result()
+func (w *Whitelist) Get(key string) (string, error) {
+	return w.client.Get(key).Result()
 }
 
-func (w *Whitelist) Del(tokenStr string) (int64, error) {
-	return w.client.Del(tokenStr).Result()
+func (w *Whitelist) Del(key string) (int64, error) {
+	return w.client.Del(key).Result()
 }

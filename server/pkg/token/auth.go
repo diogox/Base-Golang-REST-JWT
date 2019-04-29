@@ -9,7 +9,7 @@ const AuthToken = "AUTH_TOKEN"
 
 type AuthTokenOptions struct {
 	JWTSecret         []byte
-	Username          string
+	UserID            string
 	DurationInMinutes int
 }
 
@@ -19,7 +19,7 @@ func NewAuthToken(opts AuthTokenOptions) (string, error) {
 
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = opts.Username
+	claims["user_id"] = opts.UserID
 	claims["type"] = AuthToken
 	//claims["admin"] = false // TODO: Not needed for now...
 	claims["exp"] = time.Now().Add(time.Minute * time.Duration(opts.DurationInMinutes)).Unix()

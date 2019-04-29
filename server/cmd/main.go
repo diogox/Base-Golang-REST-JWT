@@ -49,7 +49,8 @@ func main() {
 		// wth GET, PUT, POST or DELETE method.
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			//AllowOrigins: []string{"http://localhost:" + app.Port},
-			AllowOrigins: []string{app.AppUrl},
+			//AllowOrigins: []string{app.AppUrl},
+			AllowOrigins: []string{"*"},
 			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 		}))
 
@@ -58,7 +59,8 @@ func main() {
 			// Server Configs
 			AppUrl: app.AppUrl,
 			JWTSecret: []byte(app.JWTSecret),
-			TokenDurationInMinutes: app.JWTDuration,
+			AuthTokenDurationInMinutes: app.JWTAuthDuration,
+			RefreshTokenDurationInMinutes: app.JWTRefreshDuration,
 
 			// Databases Configs
 			PrismaHost: app.PrismaHost,

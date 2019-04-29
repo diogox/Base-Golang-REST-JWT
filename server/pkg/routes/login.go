@@ -20,8 +20,8 @@ func login(c echo.Context) error {
 
 // For testing purposes
 func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) error {
-	// The previous token doesn't get invalidated, we just have to rely on the short duration of each token.
-	// To invalidate, we'd need to hold a token 'blacklist' in a database (probably Redis), but we're not doing that here.
+	// The previous auth token doesn't get invalidated, we just have to rely on the short duration of each token.
+	// New logins invalidate the previous refresh_token. Logouts do the same.
 
 	// Get context
 	ctx := c.Request().Context()
@@ -76,8 +76,8 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	// Generate encoded token and send it as response.
 	opts := token.AuthTokenOptions{
 		JWTSecret:         jwtSecret,
-		Username:          user.Username,
-		DurationInMinutes: tokenDurationInMinutes,
+		UserID:            user.ID,
+		DurationInMinutes: authTokenDurationInMinutes,
 	}
 
 	tokenStr, err := token.NewAuthToken(opts)
@@ -93,10 +93,10 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	refreshOpts := token.RefreshTokenOptions{
 		JWTSecret:         jwtSecret,
 		UserId:            user.ID,
-		DurationInMinutes: tokenDurationInMinutes,
+		DurationInMinutes: refreshTokenDurationInMinutes,
 	}
 
-	refreshtokenStr, err := token.NewRefreshTokenToken(refreshOpts)
+	refreshTokenStr, err := token.NewRefreshTokenToken(refreshOpts)
 	if err != nil {
 		logger.Error(err.Error())
 
@@ -106,7 +106,7 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	}
 
 	// Add the refresh token to the whitelist (and make it expire after a determined amount of time)
-	err = whitelist.Set(refreshtokenStr, tokenDurationInMinutes)
+	err = whitelist.Set(user.ID, refreshTokenStr, refreshTokenDurationInMinutes)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -114,8 +114,8 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	// Create response
 	res := auth.LoginResponse{
 		AuthToken:                   tokenStr,
-		RefreshToken:                refreshtokenStr,
-		ExpirationIntervalInMinutes: tokenDurationInMinutes,
+		RefreshToken:                refreshTokenStr,
+		ExpirationIntervalInMinutes: authTokenDurationInMinutes,
 	}
 
 	return c.JSON(http.StatusOK, res)

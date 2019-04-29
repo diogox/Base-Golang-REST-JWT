@@ -36,16 +36,6 @@ func refreshToken(c echo.Context) error {
 		})
 	}
 
-	// Get from whitelist
-	_, err = refreshTokenWhitelist.Get(req.RefreshToken)
-	if err != nil {
-
-		// Not found (most likely)
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Message: "Invalid Token!",
-		})
-	}
-
 	// Get token from string
 	refreshToken, err := jwt.Parse(req.RefreshToken, func(token *jwt.Token) (i interface{}, e error) {
 		return jwtSecret, nil
@@ -56,20 +46,39 @@ func refreshToken(c echo.Context) error {
 	expiration, _ := claims["exp"].(int64)
 	userId, _ := claims["user_id"].(string)
 
-	// Make sure token can only be refreshed 30 seconds away from its expiration
-	if time.Unix(expiration, 0).Sub(time.Now()) > 30*time.Second {
+	// Make sure the token hasn't expired
+	if time.Unix(expiration, 0).Sub(time.Now()) > 0*time.Second {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Message: "Token still valid for sufficient time. Try again later!",
 		})
 	}
 
+	// Get from whitelist
+	previousRefreshToken, err := refreshTokenWhitelist.Get(userId)
+	if err != nil {
+
+		// Not found (most likely)
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: "Invalid Token!",
+		})
+	}
+
+	// The given refresh_token must match the previous token, otherwise it's invalid
+	if previousRefreshToken != req.RefreshToken {
+
+		// Not found (most likely)
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Message: "Invalid Token!",
+		})
+	}
+
 	// Generate encoded token and send it as response.
 	refreshTokenOpts := token.RefreshTokenOptions{
-		JWTSecret: jwtSecret,
-		DurationInMinutes: tokenDurationInMinutes,
-		UserId: userId,
+		JWTSecret:         jwtSecret,
+		DurationInMinutes: refreshTokenDurationInMinutes,
+		UserId:            userId,
 	}
-	newRefreshtokenStr, err := token.NewRefreshTokenToken(refreshTokenOpts)
+	newRefreshTokenStr, err := token.NewRefreshTokenToken(refreshTokenOpts)
 	if err != nil {
 		logger.Error(err.Error())
 
@@ -80,16 +89,8 @@ func refreshToken(c echo.Context) error {
 
 	// TODO: Refactor repetitive code into smaller functions
 
-	// Remove previous token from whitelist
-	_, err = refreshTokenWhitelist.Del(req.RefreshToken)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Message: err.Error(),
-		})
-	}
-
-	// Add new token to whitelist
-	err = refreshTokenWhitelist.Set(newRefreshtokenStr, tokenDurationInMinutes)
+	// Add new token to whitelist (Replaces previous, if it exists)
+	err = refreshTokenWhitelist.Set(userId, newRefreshTokenStr, refreshTokenDurationInMinutes)
 	if err != nil {
 
 		// Already exists (most likely)
@@ -98,23 +99,11 @@ func refreshToken(c echo.Context) error {
 		})
 	}
 
-	// Get context
-	ctx := c.Request().Context()
-
-	// Get user // TODO: Remove this later? Unnecessary overhead
-	user, err := db.GetUserByID(ctx, userId)
-	if err != nil {
-		// No user found
-		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: "Failed to get user",
-		})
-	}
-
 	// Generate encoded token and send it as response.
 	authTokenOpts := token.AuthTokenOptions{
-		JWTSecret: jwtSecret,
-		DurationInMinutes: tokenDurationInMinutes,
-		Username: user.Username, // TODO: !!!!IMPORTANT!!!! Need to change auth token's options to take user id instead
+		JWTSecret:         jwtSecret,
+		DurationInMinutes: authTokenDurationInMinutes,
+		UserID:            userId, // TODO: !!!!IMPORTANT!!!! Need to change auth token's options to take user id instead
 	}
 	newAuthtokenStr, err := token.NewAuthToken(authTokenOpts)
 	if err != nil {
@@ -127,8 +116,8 @@ func refreshToken(c echo.Context) error {
 
 	// Return new token
 	return c.JSON(http.StatusOK, auth.LoginResponse{
-		AuthToken: newAuthtokenStr, // TODO: Probably should return different struct (don't need this field)
-		RefreshToken: newRefreshtokenStr,
-		ExpirationIntervalInMinutes: tokenDurationInMinutes,
+		AuthToken:                   newAuthtokenStr, // TODO: Probably should return different struct (don't need this field)
+		RefreshToken:                newRefreshTokenStr,
+		ExpirationIntervalInMinutes: authTokenDurationInMinutes, // TODO: Is this necessary?
 	})
 }

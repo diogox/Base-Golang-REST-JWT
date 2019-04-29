@@ -78,7 +78,7 @@ func sendVerificationEmail(c echo.Context) error {
 	opts := token.EmailVerificationTokenOptions{
 		JWTSecret:         jwtSecret,
 		UserId:            reqUser.ID,
-		DurationInMinutes: tokenDurationInMinutes,
+		DurationInMinutes: authTokenDurationInMinutes,
 	}
 
 	verificationToken, err := token.NewEmailVerificationToken(opts)

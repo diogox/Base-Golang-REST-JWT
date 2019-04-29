@@ -69,7 +69,7 @@ func registerHandler(c echo.Context, db server.SqlDB, emailService server.EmailS
 	// Generate encoded token to verify email
 	opts := token.EmailVerificationTokenOptions{
 		JWTSecret:         jwtSecret,
-		DurationInMinutes: tokenDurationInMinutes,
+		DurationInMinutes: authTokenDurationInMinutes,
 		UserId:            newUser.ID,
 	}
 

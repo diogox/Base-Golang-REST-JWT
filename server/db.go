@@ -15,7 +15,7 @@ type SqlDB interface {
 }
 
 type InMemoryDB interface {
-	Get(tokenStr string) (string, error)
-	Set(value string, valueDurationInMinutes int) error
-	Del(tokenStr string) (int64, error)
+	Get(key string) (string, error)
+	Set(key string, value string, valueDurationInMinutes int) error
+	Del(key string) (int64, error)
 }

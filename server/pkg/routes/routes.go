@@ -13,18 +13,22 @@ import (
 	"net/http"
 )
 
-var AppUrl string
-var db server.SqlDB
-var refreshTokenWhitelist server.InMemoryDB
-var emailService server.EmailService
-var jwtSecret []byte
-var tokenDurationInMinutes int
+var (
+	AppUrl                        string
+	db                            server.SqlDB
+	refreshTokenWhitelist         server.InMemoryDB
+	emailService                  server.EmailService
+	jwtSecret                     []byte
+	authTokenDurationInMinutes    int
+	refreshTokenDurationInMinutes int
+)
 
 type RouteOptions struct {
 	// Server Configs
-	AppUrl                 string
-	JWTSecret              []byte
-	TokenDurationInMinutes int
+	AppUrl                        string
+	JWTSecret                     []byte
+	AuthTokenDurationInMinutes    int
+	RefreshTokenDurationInMinutes int
 
 	// Databases Configs
 	PrismaHost string
@@ -62,7 +66,8 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Set vars from options
 	jwtSecret = opts.JWTSecret
-	tokenDurationInMinutes = opts.TokenDurationInMinutes
+	authTokenDurationInMinutes = opts.AuthTokenDurationInMinutes
+	refreshTokenDurationInMinutes = opts.RefreshTokenDurationInMinutes
 
 	e.Validator = newValidator()
 
@@ -98,10 +103,11 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	}
 
 	// Auth
+	e.POST("/api/auth/login", login)
 	e.POST("/api/auth/register", register)
+	e.POST("/api/auth/logout", logout, requireAuth)
 	e.POST("/api/auth/verify", sendVerificationEmail)
 	e.GET("/api/auth/verify/:token", verifyEmail)
-	e.POST("/api/auth/login", login)
 	e.POST("/api/auth/reset-password", sendPasswordResetEmail)
 	e.POST("/api/auth/reset-password/:token", resetPassword)
 	e.POST("/api/auth/refresh", refreshToken) // Refreshes the JWT token
@@ -120,9 +126,9 @@ func handleGetUsers(c echo.Context) error {
 	tokn := c.Get("user").(*jwt.Token)
 
 	claims := tokn.Claims.(jwt.MapClaims)
-	username := claims["username"].(string)
+	userId := claims["user_id"].(string)
 
-	users, err := db.GetUserByUsername(ctx, username)
+	users, err := db.GetUserByID(ctx, userId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
