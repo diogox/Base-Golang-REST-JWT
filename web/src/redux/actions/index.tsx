@@ -6,7 +6,6 @@ export interface Action {
     payload: object,
 }
 
-// TODO: Do I need this?!!
 export function login(username: string, password: string) {
     authLogin(username, password).then(res => res.json())
         .then((res: any) => {

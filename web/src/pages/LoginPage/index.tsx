@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { login } from '../../utils/AuthService'
 
-export default class SendResetPasswordEmailPage extends Component<any> {
+export default class LoginPage extends Component<any> {
     state = {
         username: '',
         password: '',
@@ -14,7 +14,9 @@ export default class SendResetPasswordEmailPage extends Component<any> {
 
         login(this.state.username,this.state.password)
             .then((res: JSON) =>{
-               this.props.history.replace('/dashboard');
+                // We redirect to the current location because the `PublicRoute` will handle the actual redirect.
+                const current = this.props.location.pathname;
+                this.props.history.replace(current);
             })
             .catch((err: Error) =>{
                 this.setState({

@@ -16,9 +16,6 @@ type NavProps = RouteComponentProps & {
 }
 
 class NavBar extends Component<NavProps> {
-    constructor(props: NavProps) {
-        super(props)
-    }
 
     authedRoutes: Route[] = [
         {
@@ -28,8 +25,11 @@ class NavBar extends Component<NavProps> {
         {
             title: "Logout",
             action: () => {
-                logout()
-                this.props.history.push('/')
+                logout().then(() =>{
+                    // We redirect to the current location because the `PrivateRoute` will handle the actual redirect.
+                    const current = this.props.location.pathname;
+                    this.props.history.replace(current);
+                });
             },
         },
     ]
@@ -71,7 +71,7 @@ class NavBar extends Component<NavProps> {
                 { title }
             </Link>
         )
-    }
+    };
 
     render() {
         return (

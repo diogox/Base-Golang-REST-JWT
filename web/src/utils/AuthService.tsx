@@ -1,6 +1,7 @@
 import decode from 'jwt-decode';
 
-const AUTH_TOKEN_KEY = 'auth_token'
+const AUTH_TOKEN_KEY = 'auth_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
 
 export const login = (username: string, password: string) => {
     // Get a token from api server using the fetch api
@@ -8,11 +9,11 @@ export const login = (username: string, password: string) => {
         method: 'POST',
         body: JSON.stringify({
             username,
-            password
+            password,
         })
     }).then(res => {
-        setToken(res.auth_token) // Setting the token in localStorage
-        return Promise.resolve(res)
+        setTokens(res.auth_token, res.refresh_token); // Setting the token in localStorage
+        return Promise.resolve(res);
     })
 };
 
@@ -23,10 +24,33 @@ export const signup = (email: string, username: string, password: string) => {
         body: JSON.stringify({
             email,
             username,
-            password
+            password,
         })
     }).then(res => {
-        return Promise.resolve(res)
+        return Promise.resolve(res);
+    })
+};
+
+// Invalidate the refresh_token on the server
+export const logout = () => {
+
+    const headers: { [key:string]:string } = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+
+    // Setting Authorization header
+    if (loggedIn()) {
+        headers['Authorization'] = 'Bearer ' + getAuthToken()
+    }
+
+    return fetch(`http://localhost:8090/api/auth/logout`, {
+        headers,
+        method: 'POST',
+    }).then(() => {
+        // Clear tokens from the localStorage
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
     })
 };
 
@@ -35,7 +59,7 @@ export const sendVerificationEmail = (email: string) => {
     return request(`http://localhost:8090/api/auth/verify`, {
         method: 'POST',
         body: JSON.stringify({
-            email
+            email,
         })
     }).then(res => {
         return Promise.resolve(res)
@@ -62,11 +86,11 @@ export const sendResetPasswordEmail = (email: string) => {
         headers,
         method: 'POST',
         body: JSON.stringify({
-            email
+            email,
         })
     }).then(_checkStatus)
       .then(res => {
-        return Promise.resolve(res)
+        return Promise.resolve(res);
     })
 };
 
@@ -81,41 +105,83 @@ export const resetPassword = (token: string, password: string) => {
         headers,
         method: 'POST',
         body: JSON.stringify({
-            password
+            password,
         })
     }).then(_checkStatus)
       .then(res => {
-        return Promise.resolve(res)
+        return Promise.resolve(res);
     })
 };
 
-export const loggedIn = () => {
+export const loggedIn = (): boolean => {
     // Checks if there is a saved token and it's still valid
-    const token = getToken(); // Getting token from localstorage
+    const authToken = getAuthToken();
+    const refreshToken = getRefreshToken();
 
-    // If there's no value, return
-    if (token === undefined) {
+    if (refreshToken === null || refreshToken === undefined) {
+        return false;
+    }
+
+    if (authToken === null || authToken === undefined) {
+        return false;
+    }
+
+    // If the authToken is invalid
+    if (isTokenExpired(authToken)) {
+
+        // If the refreshToken is valid, refresh the tokens
+        if (!isTokenExpired(refreshToken)) {
+            refreshAuth(refreshToken);
+            return true;
+        }
         return false
     }
 
-    // Check validity
-    return (!!token) && !isTokenExpired(token)
+    return true;
 };
+
+const refreshAuth = (refreshToken: string) => {
+    // Refresh the tokens
+    const headers: { [key:string]:string } = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+
+    fetch(`http://localhost:8090/api/auth/refresh`, {
+        headers,
+        method: 'POST',
+        body: JSON.stringify({
+            'refresh_token': refreshToken,
+        })
+    }).then(_checkStatus)
+        .then((res: Response) => res.json())
+        .then((res: TokenServerResponse) => {
+            setTokens(res.auth_token, res.refresh_token);
+        });
+};
+
+interface TokenServerResponse {
+    exp: number,
+    auth_token: string,
+    refresh_token: string,
+}
 
 // The model for the token received
 interface TokenType {
     exp: number,
-    auth_token: string,
 }
 
 const isTokenExpired = (token: string) => {
     try {
-        const decoded: TokenType = decode(token)
-        if (decoded.exp < Date.now() / 1000) { // Checking if token is expired.
-            return true
-        }
-        else
-            return false
+        // Decode
+        const decoded: TokenType = decode(token);
+
+        // Get Dates
+        let expDate = new Date(decoded.exp * 1000);
+        let currentDate = new Date(Date.now());
+
+        // Check if expiration date hasn't been reached yet
+        return expDate < currentDate;
     }
     catch (err) {
         return false
@@ -123,20 +189,25 @@ const isTokenExpired = (token: string) => {
 };
 
 // Saves user token to localStorage
-const setToken = (authToken: string) => localStorage.setItem(AUTH_TOKEN_KEY, authToken)
+const setTokens = (authToken: string, refreshToken: string) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, authToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+};
 
 // Retrieves the user token from localStorage
-const getToken = () => localStorage.getItem(AUTH_TOKEN_KEY)
-
-// Clear user token and profile data from localStorage
-export const logout = () => localStorage.removeItem(AUTH_TOKEN_KEY)
+const getAuthToken = () => localStorage.getItem(AUTH_TOKEN_KEY);
+const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 
 // Using jwt-decode npm package to decode the token
 export const getProfile = () => {
-    let token = getToken()
+    if (!loggedIn()) {
+        return;
+    }
+
+    let token = getAuthToken();
 
     if (token !== null) {
-        return decode(token as string)
+        return decode(token as string);
     }
 };
 
@@ -150,7 +221,7 @@ const request = (url: string, options: any) => {
     // Setting Authorization header
     // Authorization: Bearer xxxxxxx.xxxxxxxx.xxxxxx
     if (loggedIn()) {
-        headers['Authorization'] = 'Bearer ' + getToken()
+        headers['Authorization'] = 'Bearer ' + getAuthToken()
     }
 
     return fetch(url, {
@@ -166,7 +237,7 @@ const _checkStatus = (response: Response) => {
     if (response.status >= 200 && response.status < 300) { // Success status lies between 200 to 300
         return response
     } else {
-        let error = new Error(response.statusText)
+        let error = new Error(response.statusText);
         throw error
     }
-}
+};
