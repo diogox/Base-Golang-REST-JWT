@@ -9,10 +9,21 @@ func newValidator() *Validator {
 	validate := validator.New()
 
 	// Passwords must have 8 or more characters
-	validate.RegisterValidation("isValidPassword", func(fl validator.FieldLevel) bool {
+	_ = validate.RegisterValidation("isValidPassword", func(fl validator.FieldLevel) bool {
 		password := strings.TrimSpace(fl.Field().String())
 
 		if len(password) < 8  {
+			return false
+		}
+
+		return true
+	})
+
+	// Usernames must have 3 or more characters
+	_ = validate.RegisterValidation("isValidUsername", func(fl validator.FieldLevel) bool {
+		username := strings.TrimSpace(fl.Field().String())
+
+		if len(username) < 3  {
 			return false
 		}
 
