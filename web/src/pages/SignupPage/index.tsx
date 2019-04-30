@@ -92,7 +92,7 @@ export default class SignupPage extends Component<any> {
                             <button className={btnStyles} type="submit">
                                 Signup
                             </button>
-                            <Link to="login" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
+                            <Link to="/login" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
                                 Already have an account?
                             </Link>
                         </div>

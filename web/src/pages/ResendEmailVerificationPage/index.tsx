@@ -59,7 +59,7 @@ export default class ResendEmailVerificationPage extends Component<any> {
                             <button className={btnStyles} type="submit">
                                 Resend Verification
                             </button>
-                            <Link to="signup" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker">
+                            <Link to="/signup" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker">
                                 Don't have an account?
                             </Link>
                         </div>

@@ -70,10 +70,10 @@ export default class LoginPage extends Component<any> {
                                 Login
                             </button>
                             <div className="flex flex-col">
-                                <Link to="reset-password" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
+                                <Link to="/reset-password" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
                                     Forgot Password?
                                 </Link>
-                                <Link to="verify" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
+                                <Link to="/verify" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker p-1">
                                     Resend Verification Email
                                 </Link>
                             </div>

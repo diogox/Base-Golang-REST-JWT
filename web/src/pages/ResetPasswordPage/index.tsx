@@ -67,7 +67,7 @@ export default class ResetPasswordPage extends Component<any> {
                             <button className={btnStyles} type="submit">
                                 Set New Password
                             </button>
-                            <Link to="login" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker">
+                            <Link to="/login" className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker">
                                 Remember the password?
                             </Link>
                         </div>
