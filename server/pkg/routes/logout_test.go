@@ -12,8 +12,6 @@ import (
 	"testing"
 )
 
-
-
 func TestLogout(t *testing.T) {
 
 	const logoutEndpoint = "/api/auth/logout"

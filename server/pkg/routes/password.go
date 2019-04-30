@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
@@ -11,6 +12,10 @@ import (
 )
 
 func sendPasswordResetEmail(c echo.Context) error {
+	return sendPasswordResetEmailHandler(c, db, tokenWhitelist, emailService)
+}
+
+func sendPasswordResetEmailHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB, emailService server.EmailService) error {
 	// Get context
 	ctx := c.Request().Context()
 
@@ -91,7 +96,7 @@ func sendPasswordResetEmail(c echo.Context) error {
 	}
 
 	// Add to token whitelist
-	err = tokenWhitelist.SetResetPasswordTokenByUserID(reqUser.ID, resetToken, authTokenDurationInMinutes)
+	err = whitelist.SetResetPasswordTokenByUserID(reqUser.ID, resetToken, authTokenDurationInMinutes)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: "Failed to whitelist token!",
@@ -102,6 +107,10 @@ func sendPasswordResetEmail(c echo.Context) error {
 }
 
 func resetPassword(c echo.Context) error {
+	return resetPasswordHandler(c, tokenWhitelist, db)
+}
+
+func resetPasswordHandler(c echo.Context, whitelist server.InMemoryDB, db server.SqlDB) error {
 	// Get context
 	ctx := c.Request().Context()
 	logger := c.Logger()
@@ -131,7 +140,7 @@ func resetPassword(c echo.Context) error {
 	userId, _ := claims["user_id"].(string)
 
 	// Make sure token hasn't been used already
-	_, err = tokenWhitelist.GetResetPasswordTokenByUserID(userId)
+	_, err = whitelist.GetResetPasswordTokenByUserID(userId)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Message: "Token has been used!",
@@ -193,7 +202,7 @@ func resetPassword(c echo.Context) error {
 	}
 
 	// Remove token from the whitelist
-	_, err = tokenWhitelist.DelResetPasswordTokenByUserID(userId)
+	_, err = whitelist.DelResetPasswordTokenByUserID(userId)
 	if err != nil {
 		logger.Error("Failed to remove reset-password token from whitelist: " + err.Error())
 	}
