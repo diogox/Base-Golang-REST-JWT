@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/database"
 	"github.com/diogox/REST-JWT/server/pkg/email"
@@ -8,7 +10,6 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/diogox/REST-JWT/server/pkg/whitelist"
 	"github.com/labstack/echo"
-	"net/http"
 )
 
 var (

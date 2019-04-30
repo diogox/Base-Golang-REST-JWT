@@ -12,6 +12,7 @@ type SqlDB interface {
 	GetUserByEmail(ctx context.Context, userEmail string) (*models.User, error)
 	CreateUser(ctx context.Context, newUser *auth.NewRegistration) (*models.User, error)
 	UpdateUserByID(ctx context.Context, userID string, user *models.User) (*models.User, error)
+	DeleteUserByID(ctx context.Context, userID string) (*models.User, error)
 }
 
 type InMemoryDB interface {

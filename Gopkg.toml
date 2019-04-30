@@ -40,3 +40,7 @@
 [[constraint]]
   name = "gopkg.in/gomail.v2"
   branch = "v2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/bamzi/jobrunner"

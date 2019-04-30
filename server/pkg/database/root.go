@@ -151,3 +151,22 @@ func (p *PrismaDB) UpdateUserByID(ctx context.Context, userID string, user *mode
 		IsPaidUser:      updatedUser.IsPaidUser,
 	}, nil
 }
+
+func (p *PrismaDB) DeleteUserByID(ctx context.Context, userID string) (*models.User, error) {
+	user, err := p.client.DeleteUser(prisma.UserWhereUniqueInput{
+		ID: &userID,
+	}).Exec(ctx)
+
+	if err != nil {
+		return &models.User{}, nil
+	}
+
+	return &models.User{
+		ID:              user.ID,
+		Email:           user.Email,
+		Username:        user.Username,
+		Password:        user.Password,
+		IsEmailVerified: user.IsEmailVerified,
+		IsPaidUser:      user.IsPaidUser,
+	}, err
+}

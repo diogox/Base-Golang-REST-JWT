@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server"
+	"github.com/diogox/REST-JWT/server/pkg/jobs/accounts"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"github.com/bamzi/jobrunner"
+	"time"
 )
 
 func register(c echo.Context) error {
@@ -95,6 +98,9 @@ func registerHandler(c echo.Context, db server.SqlDB, emailService server.EmailS
 			Message: "Failed to send verification email!\n" + err.Error(),
 		})
 	}
+
+	// Make the account self-delete, if it's not verified within 30 days
+	jobrunner.In(30*(24*time.Hour), accounts.NewRemoveIfUnverifiedAccountJob(logger, db, newUser.ID))
 
 	// Return Successful Response
 	return c.JSON(http.StatusCreated, models.User{

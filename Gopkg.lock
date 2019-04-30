@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/bamzi/jobrunner"
+  packages = ["."]
+  revision = "273175f8b6ebabab8a639a4e6260a5c50fbf016a"
+
+[[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
@@ -75,7 +81,7 @@
 
 [[projects]]
   name = "github.com/magiconair/properties"
-  packages = ["."]
+  packages = [".","assert"]
   revision = "c2353362d570a7bfa228149c62842019201cfb71"
   version = "v1.8.0"
 
@@ -179,19 +185,25 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["acme","acme/autocert","bcrypt","blowfish"]
-  revision = "38d8ce5564a5b71b2e3a00553993f1b9a7ae852f"
+  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["idna"]
+  revision = "4829fb13d2c62012c17688fa7f629f371014946d"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "4b34438f7a67ee5f45cc6132e2bad873a20324e9"
+  revision = "d89cdac9e8725f2aefce25fcbfef41134c9ad412"
 
 [[projects]]
   name = "golang.org/x/text"
-  packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
-  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
-  version = "v0.3.0"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/language","internal/language/compact","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
 
 [[projects]]
   branch = "v3"
@@ -212,6 +224,12 @@
   revision = "81ebce5c23dfd25c6c67194b37d3dd3f338c98b1"
 
 [[projects]]
+  branch = "v2"
+  name = "gopkg.in/robfig/cron.v2"
+  packages = ["."]
+  revision = "be2e0b0deed5a68ffee390b4583a13aff8321535"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
@@ -220,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "14f69108dcf89030552fa25c450dc2046cce48c831a9211dde14ee6320d2d683"
+  inputs-digest = "5043f65e94ed362ac2dffe8fb0660efff897e00ea947fbaa4c31eb81d2a5f995"
   solver-name = "gps-cdcl"
   solver-version = 1
