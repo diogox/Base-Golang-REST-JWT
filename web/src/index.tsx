@@ -33,10 +33,10 @@ ReactDOM.render(
                 <PublicRoute exact path='/login' component={LoginPage} />
                 <PublicRoute exact path='/signup' component={SignupPage} />
                 <PrivateRoute exact path='/dashboard' component={DashboardPage} />
-                <SharedRoute exact path="/verify" component={ResendEmailVerificationPage} />
-                <SharedRoute exact path="/verify/:token" component={VerifyEmailPage} />
-                <SharedRoute exact path="/reset-password" component={SendResetPasswordEmailPage} />
-                <SharedRoute exact path="/reset-password/:token" component={ResetPasswordPage} />
+                <PublicRoute exact path="/verify" component={ResendEmailVerificationPage} />
+                <PublicRoute exact path="/verify/:token" component={VerifyEmailPage} />
+                <PublicRoute exact path="/reset-password" component={SendResetPasswordEmailPage} />
+                <PublicRoute exact path="/reset-password/:token" component={ResetPasswordPage} />
                 <SharedRoute path="" component={NotFoundPage} />
             </Switch>
         </Router>

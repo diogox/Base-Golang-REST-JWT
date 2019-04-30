@@ -4,12 +4,17 @@
     <list default="true" id="5bdedc07-739f-4a78-b924-9e729af146ee" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../.env" beforeDir="false" afterPath="$PROJECT_DIR$/../.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Gopkg.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/LoginPage/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/LoginPage/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/ResendEmailVerificationPage/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ResendEmailVerificationPage/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/ResetPasswordPage/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ResetPasswordPage/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/SendResetPasswordEmailPage/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/SendResetPasswordEmailPage/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/SignupPage/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/SignupPage/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../npm-debug.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/refresh_whitelist/root.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/whitelist/root.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/login.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/logout.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/logout.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/logout_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/logout_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/mocks/memory_db.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/mocks/memory_db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/password_reset.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/password_reset.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/refresh.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/refresh.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/routes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.tsx" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -46,13 +51,25 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/components/NavBar/index.tsx">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1447">
               <caret line="69" column="24" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
               <folding>
                 <element signature="e#0#40#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/index.tsx">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="546">
+              <caret line="33" column="54" selection-start-line="33" selection-start-column="54" selection-end-line="33" selection-end-column="54" />
+              <folding>
+                <element signature="e#0#25#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -105,12 +122,12 @@
         <option value="$PROJECT_DIR$/src/redux/actions/index.tsx" />
         <option value="$PROJECT_DIR$/src/utils/AuthService.tsx" />
         <option value="$PROJECT_DIR$/src/components/NavBar/index.tsx" />
-        <option value="$PROJECT_DIR$/src/index.tsx" />
         <option value="$PROJECT_DIR$/src/pages/SignupPage/index.tsx" />
         <option value="$PROJECT_DIR$/src/pages/ResetPasswordPage/index.tsx" />
         <option value="$PROJECT_DIR$/src/pages/SendResetPasswordEmailPage/index.tsx" />
         <option value="$PROJECT_DIR$/src/pages/LoginPage/index.tsx" />
         <option value="$PROJECT_DIR$/src/pages/ResendEmailVerificationPage/index.tsx" />
+        <option value="$PROJECT_DIR$/src/index.tsx" />
       </list>
     </option>
   </component>
@@ -277,18 +294,18 @@
       <option name="presentableId" value="Default" />
       <updated>1556286541605</updated>
       <workItem from="1556286546776" duration="13134000" />
-      <workItem from="1556531503224" duration="11860000" />
+      <workItem from="1556531503224" duration="12485000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24994000" />
+    <option name="totallyTimeSpent" value="25619000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-35" width="1920" height="1115" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16622691" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16622691" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="npm" order="2" side_tool="true" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -406,13 +423,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/index.tsx">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="2" column="32" selection-start-line="2" selection-start-column="32" selection-end-line="2" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/DashboardPage/index.tsx">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -469,6 +479,16 @@
           <caret line="69" column="24" selection-start-line="69" selection-start-column="24" selection-end-line="69" selection-end-column="24" />
           <folding>
             <element signature="e#0#40#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/index.tsx">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="546">
+          <caret line="33" column="54" selection-start-line="33" selection-start-column="54" selection-end-line="33" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
           </folding>
         </state>
       </provider>
