@@ -13,7 +13,7 @@ type RefreshTokenOptions struct {
 	DurationInMinutes int
 }
 
-func NewRefreshTokenToken(opts RefreshTokenOptions) (string, error) {
+func NewRefreshToken(opts RefreshTokenOptions) (string, error) {
 
 	// Create verification token
 	token := jwt.New(jwt.SigningMethodHS256)

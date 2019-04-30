@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"github.com/bamzi/jobrunner"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/jobs/accounts"
@@ -11,7 +12,6 @@ import (
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"github.com/bamzi/jobrunner"
 	"time"
 )
 

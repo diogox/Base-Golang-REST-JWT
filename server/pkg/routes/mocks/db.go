@@ -83,3 +83,15 @@ func (m *MockDB) UpdateUserByID(ctx context.Context, userID string, user *models
 
 	return nil, errors.New("User not found")
 }
+
+func (m *MockDB) DeleteUserByID(ctx context.Context, userID string) (*models.User, error) {
+	for i, u := range m.users {
+		if u.ID == userID {
+			deletedUser := m.users[i]
+			m.users = append(m.users[:i], m.users[i+1:]...)
+			return &deletedUser, nil
+		}
+	}
+
+	return nil, errors.New("User not found")
+}

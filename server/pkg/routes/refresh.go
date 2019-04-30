@@ -2,14 +2,20 @@ package routes
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"net/http"
 )
 
 func refreshToken(c echo.Context) error {
+	return refreshTokenHandler(c, db, tokenWhitelist)
+}
+
+func refreshTokenHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) error {
 
 	// Get logger
 	logger := c.Logger()
@@ -43,7 +49,6 @@ func refreshToken(c echo.Context) error {
 	// Get expiration time
 	claims := refreshToken.Claims.(jwt.MapClaims)
 	userId, _ := claims["user_id"].(string)
-	userRole, _ := claims["user_role"].(string)
 
 	// Make sure the token hasn't expired
 	if !token.AssertAndValidate(refreshToken, token.RefreshToken) {
@@ -53,7 +58,7 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Get from whitelist
-	previousRefreshToken, err := tokenWhitelist.GetRefreshTokenByUserID(userId)
+	previousRefreshToken, err := whitelist.GetRefreshTokenByUserID(userId)
 	if err != nil {
 
 		// Not found (most likely)
@@ -77,7 +82,7 @@ func refreshToken(c echo.Context) error {
 		DurationInMinutes: refreshTokenDurationInMinutes,
 		UserId:            userId,
 	}
-	newRefreshTokenStr, err := token.NewRefreshTokenToken(refreshTokenOpts)
+	newRefreshTokenStr, err := token.NewRefreshToken(refreshTokenOpts)
 	if err != nil {
 		logger.Error(err.Error())
 
@@ -89,7 +94,7 @@ func refreshToken(c echo.Context) error {
 	// TODO: Refactor repetitive code into smaller functions
 
 	// Add new token to whitelist (Replaces previous, if it exists)
-	err = tokenWhitelist.SetRefreshTokenByUserID(userId, newRefreshTokenStr, refreshTokenDurationInMinutes)
+	err = whitelist.SetRefreshTokenByUserID(userId, newRefreshTokenStr, refreshTokenDurationInMinutes)
 	if err != nil {
 
 		// Already exists (most likely)
@@ -98,12 +103,23 @@ func refreshToken(c echo.Context) error {
 		})
 	}
 
+	// Get user
+	ctx := c.Request().Context()
+	user, err := db.GetUserByID(ctx, userId)
+	if err != nil {
+
+		// Already exists (most likely)
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: "Failed to get user!",
+		})
+	}
+
 	// Generate encoded token and send it as response.
 	authTokenOpts := token.AuthTokenOptions{
 		JWTSecret:         jwtSecret,
 		DurationInMinutes: authTokenDurationInMinutes,
-		UserRole:          userRole,
-		UserID:            userId, // TODO: !!!!IMPORTANT!!!! Need to change auth token's options to take user id instead
+		UserRole:          authentication.ResolveUserRole(user.IsPaidUser),
+		UserID:            userId,
 	}
 	newAuthtokenStr, err := token.NewAuthToken(authTokenOpts)
 	if err != nil {

@@ -98,7 +98,7 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 		DurationInMinutes: refreshTokenDurationInMinutes,
 	}
 
-	refreshTokenStr, err := token.NewRefreshTokenToken(refreshOpts)
+	refreshTokenStr, err := token.NewRefreshToken(refreshOpts)
 	if err != nil {
 		logger.Error(err.Error())
 

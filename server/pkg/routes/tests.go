@@ -10,6 +10,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const testJWTSecret = "SuperSecretSecret"
+
 func SetupTestServer() *echo.Echo {
 	// Create server
 	e := echo.New()
@@ -18,7 +20,7 @@ func SetupTestServer() *echo.Echo {
 	opts := RouteOptions{
 		PrismaHost: "localhost",
 		RedisHost:  "localhost",
-		JWTSecret:  []byte("SuperSecretSecret"),
+		JWTSecret:  []byte(testJWTSecret),
 	}
 	SetupRoutes(e, opts)
 
