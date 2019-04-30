@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/diogox/REST-JWT/server/pkg/routes/mocks"
 	"github.com/labstack/echo"
 	"github.com/magiconair/properties/assert"
@@ -44,13 +45,13 @@ func TestLogout(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		// Prep
-		c.Set("userID", userID)
+		c.Set(authentication.USER_ID_PARAM, userID)
 
 		// Assertions
 		assert.Equal(t, logoutHandler(c, memoryDB), nil)
 		assert.Equal(t, rec.Code, http.StatusOK)
 
-		if value, err := memoryDB.Get(userID); err != nil {
+		if value, err := memoryDB.GetRefreshTokenByUserID(userID); err != nil {
 			assert.Equal(t, value, "")
 		}
 	})

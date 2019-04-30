@@ -15,7 +15,13 @@ type SqlDB interface {
 }
 
 type InMemoryDB interface {
-	Get(key string) (string, error)
-	Set(key string, value string, valueDurationInMinutes int) error
-	Del(key string) (int64, error)
+	// Refresh Token
+	GetRefreshTokenByUserID(key string) (string, error)
+	SetRefreshTokenByUserID(key string, value string, valueDurationInMinutes int) error
+	DelRefreshTokenByUserID(key string) (int64, error)
+
+	// Reset Password Token
+	GetResetPasswordTokenByUserID(key string) (string, error)
+	SetResetPasswordTokenByUserID(key string, value string, valueDurationInMinutes int) error
+	DelResetPasswordTokenByUserID(key string) (int64, error)
 }

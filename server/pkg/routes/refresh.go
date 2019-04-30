@@ -53,7 +53,7 @@ func refreshToken(c echo.Context) error {
 	}
 
 	// Get from whitelist
-	previousRefreshToken, err := refreshTokenWhitelist.Get(userId)
+	previousRefreshToken, err := tokenWhitelist.GetRefreshTokenByUserID(userId)
 	if err != nil {
 
 		// Not found (most likely)
@@ -89,7 +89,7 @@ func refreshToken(c echo.Context) error {
 	// TODO: Refactor repetitive code into smaller functions
 
 	// Add new token to whitelist (Replaces previous, if it exists)
-	err = refreshTokenWhitelist.Set(userId, newRefreshTokenStr, refreshTokenDurationInMinutes)
+	err = tokenWhitelist.SetRefreshTokenByUserID(userId, newRefreshTokenStr, refreshTokenDurationInMinutes)
 	if err != nil {
 
 		// Already exists (most likely)

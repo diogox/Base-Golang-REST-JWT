@@ -90,15 +90,26 @@ func sendPasswordResetEmail(c echo.Context) error {
 		})
 	}
 
+	// Add to token whitelist
+	err = tokenWhitelist.SetResetPasswordTokenByUserID(reqUser.ID, resetToken, authTokenDurationInMinutes)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: "Failed to whitelist token!",
+		})
+	}
+
 	return c.String(http.StatusOK, "Password reset email sent!")
 }
 
 func resetPassword(c echo.Context) error {
 	// Get context
 	ctx := c.Request().Context()
+	logger := c.Logger()
 
 	// Get token
 	tokenString := c.Param("token")
+
+	// Parse token
 	tokn, err := jwt.Parse(tokenString, func(token *jwt.Token) (i interface{}, e error) {
 		return jwtSecret, nil
 	})
@@ -118,6 +129,14 @@ func resetPassword(c echo.Context) error {
 	// Get user id associated with token
 	claims := tokn.Claims.(jwt.MapClaims)
 	userId, _ := claims["user_id"].(string)
+
+	// Make sure token hasn't been used already
+	_, err = tokenWhitelist.GetResetPasswordTokenByUserID(userId)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: "Token has been used!",
+		})
+	}
 
 	// Get new password sent in the body of the request
 	var newPasswordReq struct {
@@ -171,6 +190,12 @@ func resetPassword(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
 		})
+	}
+
+	// Remove token from the whitelist
+	_, err = tokenWhitelist.DelResetPasswordTokenByUserID(userId)
+	if err != nil {
+		logger.Error("Failed to remove reset-password token from whitelist: " + err.Error())
 	}
 
 	return c.String(http.StatusOK, "Password changed successfully!")

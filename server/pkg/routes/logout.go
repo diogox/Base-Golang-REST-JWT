@@ -9,7 +9,7 @@ import (
 )
 
 func logout(c echo.Context) error {
-	return logoutHandler(c, refreshTokenWhitelist)
+	return logoutHandler(c, tokenWhitelist)
 }
 
 // Invalidates the previous refresh_token
@@ -22,7 +22,7 @@ func logoutHandler(c echo.Context, whitelist server.InMemoryDB) error {
 	userId := c.Get(authentication.USER_ID_PARAM).(string)
 
 	// Remove the refresh token, for the requesting user, from the whitelist, if it exists.
-	_, err := whitelist.Del(userId)
+	_, err := whitelist.DelRefreshTokenByUserID(userId)
 	if err != nil {
 		logger.Error(err.Error())
 

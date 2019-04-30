@@ -16,7 +16,7 @@ import (
 //  remove it and return new refresh token.
 
 func login(c echo.Context) error {
-	return loginHandler(c, db, refreshTokenWhitelist)
+	return loginHandler(c, db, tokenWhitelist)
 }
 
 // For testing purposes
@@ -108,7 +108,7 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	}
 
 	// Add the refresh token to the whitelist (and make it expire after a determined amount of time)
-	err = whitelist.Set(user.ID, refreshTokenStr, refreshTokenDurationInMinutes)
+	err = whitelist.SetRefreshTokenByUserID(user.ID, refreshTokenStr, refreshTokenDurationInMinutes)
 	if err != nil {
 		logger.Error(err.Error())
 	}
