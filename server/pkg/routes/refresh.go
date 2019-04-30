@@ -43,6 +43,7 @@ func refreshToken(c echo.Context) error {
 	// Get expiration time
 	claims := refreshToken.Claims.(jwt.MapClaims)
 	userId, _ := claims["user_id"].(string)
+	userRole, _ := claims["user_role"].(string)
 
 	// Make sure the token hasn't expired
 	if !token.AssertAndValidate(refreshToken, token.RefreshToken) {
@@ -101,6 +102,7 @@ func refreshToken(c echo.Context) error {
 	authTokenOpts := token.AuthTokenOptions{
 		JWTSecret:         jwtSecret,
 		DurationInMinutes: authTokenDurationInMinutes,
+		UserRole:          userRole,
 		UserID:            userId, // TODO: !!!!IMPORTANT!!!! Need to change auth token's options to take user id instead
 	}
 	newAuthtokenStr, err := token.NewAuthToken(authTokenOpts)

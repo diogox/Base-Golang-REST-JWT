@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
+	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -18,7 +19,7 @@ func logoutHandler(c echo.Context, whitelist server.InMemoryDB) error {
 	logger := c.Logger()
 
 	// Get auth's user token
-	userId := c.Get(USER_ID_PARAM).(string)
+	userId := c.Get(authentication.USER_ID_PARAM).(string)
 
 	// Remove the refresh token, for the requesting user, from the whitelist, if it exists.
 	_, err := whitelist.Del(userId)

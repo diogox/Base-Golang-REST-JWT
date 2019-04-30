@@ -140,10 +140,11 @@ func verifyEmail(c echo.Context) error {
 
 	// Update user to have email verified
 	updatedUser := models.User{
-		ID: user.ID,
-		Email: user.Email,
-		Username: user.Username,
-		Password: user.Password,
+		ID:              user.ID,
+		Email:           user.Email,
+		Username:        user.Username,
+		Password:        user.Password,
+		IsPaidUser:      user.IsPaidUser,
 		IsEmailVerified: true,
 	}
 

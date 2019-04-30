@@ -1,19 +1,15 @@
 package routes
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/database"
 	"github.com/diogox/REST-JWT/server/pkg/email"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/refresh_whitelist"
-	"github.com/diogox/REST-JWT/server/pkg/token"
+	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	"net/http"
 )
-
-const USER_ID_PARAM = "UserID"
 
 var (
 	AppUrl                        string
@@ -78,37 +74,14 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	//e.File("/favicon.ico", "../web/images/favicon.ico")
 	e.Static("/static", "./web/build/static")
 
-	// By default, the key is extracted from the header "Authorization".
-	// To get it from a field named `token` in the JSON we could add `TokenLookup: "query:token"` to the JWT Configs
-	requireAuth := func(next echo.HandlerFunc) echo.HandlerFunc {
-		// Middleware to check the token is of type `AuthToken`
-		f := func(c echo.Context) error {
-			t := c.Get(USER_ID_PARAM).(*jwt.Token)
-
-			// Check if valid (the jwt middleware already does this, but we might want to do additional checks...)
-			if !token.AssertAndValidate(t, token.AuthToken) {
-				return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-					Message: "Invalid Token!",
-				})
-			}
-
-			// Set user id to context
-			claims := t.Claims.(jwt.MapClaims)
-			userID := claims["user_id"].(string)
-			c.Set("userID", userID)
-
-			return next(c)
-		}
-
-		// Return both middleware
-		jwtMiddleware := middleware.JWT(jwtSecret)
-		return jwtMiddleware(f)
-	}
+	// Permissions
+	allowAllUsers := authentication.RequireAuth(jwtSecret)
+	//allowOnlyPremiumUsers := authentication.RequireAuth(jwtSecret, authentication.PREMIUM_USER_ROLE)
 
 	// Auth
 	e.POST("/api/auth/login", login)
 	e.POST("/api/auth/register", register)
-	e.POST("/api/auth/logout", logout, requireAuth)
+	e.POST("/api/auth/logout", logout, allowAllUsers)
 	e.POST("/api/auth/verify", sendVerificationEmail)
 	e.GET("/api/auth/verify/:token", verifyEmail)
 	e.POST("/api/auth/reset-password", sendPasswordResetEmail)
@@ -116,7 +89,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.POST("/api/auth/refresh", refreshToken) // Refreshes the JWT token
 
 	// Endpoint that requires authentication
-	apiEndpoint := e.Group("/api", requireAuth)
+	apiEndpoint := e.Group("/api", allowAllUsers)
 
 	// API endpoints (TODO: Add endpoints here!)
 	apiEndpoint.GET("/users", handleGetUsers)
@@ -126,7 +99,7 @@ func handleGetUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	//logger := c.Logger()
 
-	userID, _ := c.Get(USER_ID_PARAM).(string)
+	userID, _ := c.Get(authentication.USER_ID_PARAM).(string)
 
 	users, err := db.GetUserByID(ctx, userID)
 	if err != nil {

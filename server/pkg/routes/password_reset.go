@@ -82,7 +82,7 @@ func sendPasswordResetEmail(c echo.Context) error {
 	// Send verification email
 	err = emailService.SendEmail(user, models.NewEmail{
 		Subject: "Registration",
-		Message: fmt.Sprintf("%s, you have requested a password reset: %s", user.Username, AppUrl + "/reset-password/" + resetToken),
+		Message: fmt.Sprintf("%s, you have requested a password reset: %s", user.Username, AppUrl+"/reset-password/"+resetToken),
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -165,6 +165,7 @@ func resetPassword(c echo.Context) error {
 		Username:        user.Username,
 		Password:        string(hashedPassword),
 		IsEmailVerified: user.IsEmailVerified,
+		IsPaidUser:      user.IsPaidUser,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{

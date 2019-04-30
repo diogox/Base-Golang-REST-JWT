@@ -44,6 +44,7 @@ func (p *PrismaDB) GetUserByID(ctx context.Context, userId string) (*models.User
 		Username:        user.Username,
 		Password:        user.Password,
 		IsEmailVerified: user.IsEmailVerified,
+		IsPaidUser:      user.IsPaidUser,
 	}, nil
 }
 
@@ -66,6 +67,7 @@ func (p *PrismaDB) GetUserByUsername(ctx context.Context, username string) (*mod
 		Username:        user.Username,
 		Password:        user.Password,
 		IsEmailVerified: user.IsEmailVerified,
+		IsPaidUser:      user.IsPaidUser,
 	}, nil
 }
 
@@ -88,6 +90,7 @@ func (p *PrismaDB) GetUserByEmail(ctx context.Context, userEmail string) (*model
 		Username:        user.Username,
 		Password:        user.Password,
 		IsEmailVerified: user.IsEmailVerified,
+		IsPaidUser:      user.IsPaidUser,
 	}, nil
 }
 
@@ -99,6 +102,7 @@ func (p *PrismaDB) CreateUser(ctx context.Context, req *auth.NewRegistration) (*
 		Username:        req.Username,
 		Password:        req.Password,
 		IsEmailVerified: false,
+		IsPaidUser:      true,
 	}
 
 	// Create User
@@ -109,9 +113,10 @@ func (p *PrismaDB) CreateUser(ctx context.Context, req *auth.NewRegistration) (*
 
 	// Return User Info
 	return &models.User{
-		ID:       res.ID,
-		Email:    res.Email,
-		Username: res.Username,
+		ID:         res.ID,
+		Email:      res.Email,
+		Username:   res.Username,
+		IsPaidUser: res.IsPaidUser,
 	}, nil
 }
 
@@ -127,6 +132,7 @@ func (p *PrismaDB) UpdateUserByID(ctx context.Context, userID string, user *mode
 			Username:        &user.Username,
 			Password:        &user.Password,
 			IsEmailVerified: &user.IsEmailVerified,
+			IsPaidUser:      &user.IsPaidUser,
 		},
 	}).Exec(ctx)
 
@@ -142,5 +148,6 @@ func (p *PrismaDB) UpdateUserByID(ctx context.Context, userID string, user *mode
 		Username:        updatedUser.Username,
 		Password:        updatedUser.Password,
 		IsEmailVerified: updatedUser.IsEmailVerified,
+		IsPaidUser:      updatedUser.IsPaidUser,
 	}, nil
 }

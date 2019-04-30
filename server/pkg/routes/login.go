@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"net/http"
 
 	"github.com/diogox/REST-JWT/server"
@@ -77,6 +78,7 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	opts := token.AuthTokenOptions{
 		JWTSecret:         jwtSecret,
 		UserID:            user.ID,
+		UserRole:          authentication.ResolveUserRole(user.IsPaidUser),
 		DurationInMinutes: authTokenDurationInMinutes,
 	}
 
