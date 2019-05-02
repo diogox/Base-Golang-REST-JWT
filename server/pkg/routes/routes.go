@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/diogox/REST-JWT/server/pkg/blacklist"
+	"github.com/diogox/REST-JWT/server/pkg/routes/profile"
 	"net/http"
 
 	"github.com/diogox/REST-JWT/server"
@@ -118,7 +119,8 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	apiEndpoint := e.Group("/api", allowAllUsers)
 
 	// API endpoints (TODO: Add endpoints here!)
-	apiEndpoint.GET("/profile", profile)
+	apiEndpoint.GET("/profile", profile.GetProfile(db))
+	apiEndpoint.POST("/profile/username", profile.SetUsername(db))
 	apiEndpoint.GET("/users", handleGetUsers)
 }
 

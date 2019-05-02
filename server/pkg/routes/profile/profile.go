@@ -1,4 +1,4 @@
-package routes
+package profile
 
 import (
 	"github.com/diogox/REST-JWT/server"
@@ -8,11 +8,13 @@ import (
 	"net/http"
 )
 
-func profile(c echo.Context) error {
-	return handleProfile(c, db)
+func GetProfile(db server.DB) func (c echo.Context) error {
+	return func(c echo.Context) error {
+		return handleGetProfile(c, db)
+	}
 }
 
-func handleProfile(c echo.Context, db server.DB) error {
+func handleGetProfile(c echo.Context, db server.DB) error {
 	ctx := c.Request().Context()
 	//logger := c.Logger()
 
@@ -27,6 +29,7 @@ func handleProfile(c echo.Context, db server.DB) error {
 		})
 	}
 
+	// Return user info
 	return c.JSON(http.StatusOK, models.User{
 		Email:      user.Email,
 		Username:   user.Username,
