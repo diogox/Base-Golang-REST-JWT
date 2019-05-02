@@ -18,9 +18,13 @@ func SetupTestServer() *echo.Echo {
 
 	// Setup the routes
 	opts := RouteOptions{
-		PrismaHost: "localhost",
-		RedisHost:  "localhost",
-		JWTSecret:  []byte(testJWTSecret),
+		PrismaHost:                           "localhost",
+		RedisHost:                            "localhost",
+		JWTSecret:                            []byte(testJWTSecret),
+		AccountLockDuration:                  10,
+		AccountAllowedNOfFailedLoginAttempts: 5,
+		RefreshTokenDurationInMinutes:        2440,
+		AuthTokenDurationInMinutes:           5,
 	}
 	SetupRoutes(e, opts)
 

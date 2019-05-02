@@ -62,7 +62,7 @@ func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blac
 		count = "0"
 	}
 
-	if cnt, err := strconv.Atoi(count); err != nil || cnt >= 5 {
+	if cnt, err := strconv.Atoi(count); err != nil || cnt >= accountAllowedNOfFailedLoginAttempts {
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Message: "Too many failed attempts, your account has been locked. Try again in 10 minutes!",
 		})

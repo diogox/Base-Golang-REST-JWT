@@ -23,6 +23,10 @@ const (
 	EmailPortEnv     = "EMAIL_PORT"
 	EmailUsernameEnv = "EMAIL_USERNAME"
 	EmailPasswordEnv = "EMAIL_PASSWORD"
+
+	// Accounts Config
+	AccountAllowedNOfFailedLoginAttemptsEnv = "ACCOUNT_ALLOWED_N_OF_FAILED_LOGIN_ATTEMPTS"
+	AccountLockDurationEnv                  = "ACCOUNT_LOCK_DURATION_IN_MINUTES"
 )
 
 var (
@@ -43,6 +47,10 @@ var (
 	EmailPort     int
 	EmailUsername string
 	EmailPassword string
+
+	// Accounts Config
+	AccountAllowedNOfFailedLoginAttempts int
+	AccountLockDuration                  int
 )
 
 var Cmd = &cobra.Command{
@@ -56,17 +64,9 @@ func init() {
 	viper.AutomaticEnv()
 
 	/* Server Configuration */
-
-	// Get url
 	Cmd.PersistentFlags().StringVarP(&AppUrl, "app-url", "u", viper.GetString(AppUrlEnv), "Set the app's url to be used")
-
-	// Get port
 	Cmd.PersistentFlags().StringVarP(&Port, "port", "p", viper.GetString(PortEnv), "Set the port to be used")
-
-	// Get jwt secret
 	Cmd.PersistentFlags().StringVarP(&JWTSecret, "jwt-secret", "s", viper.GetString(JWTSecretEnv), "Set the JWT secret to be used")
-
-	// Get jwt duration
 	Cmd.PersistentFlags().IntVarP(&JWTAuthDuration, "jwt-auth-duration", "t", viper.GetInt(JWTAuthDurationEnv), "Set the JWT Auth Token duration before it needs to be refreshed")
 	Cmd.PersistentFlags().IntVarP(&JWTRefreshDuration, "jwt-refresh-duration", "r", viper.GetInt(JWTRefreshDurationEnv), "Set the JWT Refresh Token duration before it needs to be refreshed")
 
@@ -75,19 +75,13 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&RedisHost, "redis", "", viper.GetString(RedisHostEnv), "Set the Host name for the redis database.")
 
 	/* Email Service Configuration */
-
-	// Get our email
 	Cmd.PersistentFlags().StringVarP(&Email, "email", "", viper.GetString(EmailEnv), "Set the email to e used")
-
-	// Get email service host
 	Cmd.PersistentFlags().StringVarP(&EmailHost, "email-host", "", viper.GetString(EmailHostEnv), "Set the email service's host")
-
-	// Get email service port
 	Cmd.PersistentFlags().IntVarP(&EmailPort, "email-port", "", viper.GetInt(EmailPortEnv), "Set the email service's port")
-
-	// Get email service username
 	Cmd.PersistentFlags().StringVarP(&EmailUsername, "email-username", "", viper.GetString(EmailUsernameEnv), "Set the email service's username")
-
-	// Get email service username
 	Cmd.PersistentFlags().StringVarP(&EmailPassword, "email-password", "", viper.GetString(EmailPasswordEnv), "Set the email service's password")
+
+	/* Accounts Config */
+	Cmd.PersistentFlags().IntVarP(&AccountAllowedNOfFailedLoginAttempts, "failed-login-attempts", "", viper.GetInt(AccountAllowedNOfFailedLoginAttemptsEnv), "Set the number of failed-login attempts a user can make before the account is locked")
+	Cmd.PersistentFlags().IntVarP(&AccountLockDuration, "account-lock-duration", "", viper.GetInt(AccountLockDurationEnv), "Set the number of minutes an account stays locked for")
 }

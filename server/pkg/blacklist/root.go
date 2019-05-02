@@ -7,7 +7,7 @@ import (
 
 const failedLoginPrefix = "failed_login:blacklist:"
 
-func NewBlacklist(host string) (*Blacklist, error) {
+func NewBlacklist(host string, accountLockDuration int) (*Blacklist, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     host + ":6379",
 		Password: "", // no password set
@@ -16,12 +16,14 @@ func NewBlacklist(host string) (*Blacklist, error) {
 
 	_, err := client.Ping().Result()
 	return &Blacklist{
-		client: client,
+		client:              client,
+		accountLockDuration: accountLockDuration,
 	}, err
 }
 
 type Blacklist struct {
-	client *redis.Client
+	client              *redis.Client
+	accountLockDuration int
 }
 
 func (b *Blacklist) GetFailedLoginCountByUserID(userID string) (string, error) {
@@ -29,14 +31,15 @@ func (b *Blacklist) GetFailedLoginCountByUserID(userID string) (string, error) {
 }
 
 func (b *Blacklist) IncrementFailedLoginCountByUserID(userID string) error {
-	err :=  b.client.Incr(failedLoginPrefix + userID).Err()
+	err := b.client.Incr(failedLoginPrefix + userID).Err()
 	if err != nil {
 		return err
 	}
-	return b.client.Expire(failedLoginPrefix + userID, 10 * time.Minute).Err()
+
+	lockDuration := time.Duration(b.accountLockDuration) * time.Minute
+	return b.client.Expire(failedLoginPrefix+userID, lockDuration).Err()
 }
 
 func (b *Blacklist) ResetFailedLoginCountByUserID(userID string) error {
 	return b.client.Del(failedLoginPrefix + userID).Err()
 }
-

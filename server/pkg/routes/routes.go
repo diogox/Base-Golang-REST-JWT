@@ -14,14 +14,23 @@ import (
 )
 
 var (
+	// Server Configs
 	AppUrl                        string
-	db                            server.DB
-	tokenWhitelist                server.Whitelist
-	loginBlacklist                server.Blacklist
-	emailService                  server.EmailService
 	jwtSecret                     []byte
 	authTokenDurationInMinutes    int
 	refreshTokenDurationInMinutes int
+
+	// Databases
+	db                            server.DB
+	tokenWhitelist                server.Whitelist
+	loginBlacklist                server.Blacklist
+
+	// Email Service
+	emailService                  server.EmailService
+
+	// Account Configs
+	accountAllowedNOfFailedLoginAttempts int
+	accountLockDuration                  int
 )
 
 type RouteOptions struct {
@@ -41,23 +50,25 @@ type RouteOptions struct {
 	EmailPort     int
 	EmailUsername string
 	EmailPassword string
+
+	// Account Configs
+	AccountAllowedNOfFailedLoginAttempts int
+	AccountLockDuration                  int
 }
 
 func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	AppUrl = opts.AppUrl
 
-	// Instantiate Prisma client
+	/* Init Databases */
 	db = server.DB(database.NewPrismaDB(opts.PrismaHost))
 
-	// Instantiate whitelist
 	whitelist, err := whitelist.NewWhitelist(opts.RedisHost)
 	if err != nil {
 		panic("Failed to connect to redis database: " + err.Error())
 	}
 	tokenWhitelist = whitelist
 
-	// Instantiate blacklist
-	blacklist, err := blacklist.NewBlacklist(opts.RedisHost)
+	blacklist, err := blacklist.NewBlacklist(opts.RedisHost, opts.AccountLockDuration)
 	if err != nil {
 		panic("Failed to connect to redis database: " + err.Error())
 	}
@@ -76,6 +87,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	jwtSecret = opts.JWTSecret
 	authTokenDurationInMinutes = opts.AuthTokenDurationInMinutes
 	refreshTokenDurationInMinutes = opts.RefreshTokenDurationInMinutes
+	accountAllowedNOfFailedLoginAttempts = opts.AccountAllowedNOfFailedLoginAttempts
 
 	e.Validator = newValidator()
 

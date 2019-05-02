@@ -50,6 +50,7 @@ func main() {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			//AllowOrigins: []string{"http://localhost:" + app.Port},
 			//AllowOrigins: []string{app.AppUrl},
+			// TODO: this is for development only!!
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 		}))
@@ -57,25 +58,29 @@ func main() {
 		// Routes
 		opts := routes.RouteOptions{
 			// Server Configs
-			AppUrl: app.AppUrl,
-			JWTSecret: []byte(app.JWTSecret),
-			AuthTokenDurationInMinutes: app.JWTAuthDuration,
+			AppUrl:                        app.AppUrl,
+			JWTSecret:                     []byte(app.JWTSecret),
+			AuthTokenDurationInMinutes:    app.JWTAuthDuration,
 			RefreshTokenDurationInMinutes: app.JWTRefreshDuration,
 
 			// Databases Configs
 			PrismaHost: app.PrismaHost,
-			RedisHost: app.RedisHost,
+			RedisHost:  app.RedisHost,
 
 			// Email Service Configs
-			Email: app.Email,
-			EmailHost: app.EmailHost,
-			EmailPort: app.EmailPort,
+			Email:         app.Email,
+			EmailHost:     app.EmailHost,
+			EmailPort:     app.EmailPort,
 			EmailUsername: app.EmailUsername,
 			EmailPassword: app.EmailPassword,
+
+			// Account Configs
+			AccountAllowedNOfFailedLoginAttempts: app.AccountAllowedNOfFailedLoginAttempts,
+			AccountLockDuration:                  app.AccountLockDuration,
 		}
 		routes.SetupRoutes(e, opts)
 
-		return e.Start( fmt.Sprintf(":%s", app.Port) )
+		return e.Start(fmt.Sprintf(":%s", app.Port))
 	}
 
 	if err := app.Cmd.Execute(); err != nil {
