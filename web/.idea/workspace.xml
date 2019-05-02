@@ -3,8 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5bdedc07-739f-4a78-b924-9e729af146ee" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../.env" beforeDir="false" afterPath="$PROJECT_DIR$/../.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/pkg/routes/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/../server/pkg/routes/login.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/AuthService.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/AuthService.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -292,12 +291,12 @@
       <option name="presentableId" value="Default" />
       <updated>1556286541605</updated>
       <workItem from="1556286546776" duration="13134000" />
-      <workItem from="1556531503224" duration="16607000" />
+      <workItem from="1556531503224" duration="17207000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="29741000" />
+    <option name="totallyTimeSpent" value="30341000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-35" width="1920" height="1115" extended-state="6" />

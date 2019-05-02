@@ -83,7 +83,7 @@ func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blac
 
 		// Should be locked
 		if count + 1  >= accountAllowedNOfFailedLoginAttempts {
-			msg := fmt.Sprintf("%s Try again in %.0f minutes.", accountLockedError, timeUntilExpire.Minutes())
+			msg := fmt.Sprintf("%s Try again in %.0f minutes or reset your password!", accountLockedError, timeUntilExpire.Minutes())
 
 			return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 				Message: msg,

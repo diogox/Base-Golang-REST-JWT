@@ -107,10 +107,10 @@ func sendPasswordResetEmailHandler(c echo.Context, db server.DB, whitelist serve
 }
 
 func resetPassword(c echo.Context) error {
-	return resetPasswordHandler(c, tokenWhitelist, db)
+	return resetPasswordHandler(c, tokenWhitelist, loginBlacklist, db)
 }
 
-func resetPasswordHandler(c echo.Context, whitelist server.Whitelist, db server.DB) error {
+func resetPasswordHandler(c echo.Context, whitelist server.Whitelist, loginBlacklist server.Blacklist, db server.DB) error {
 	// Get context
 	ctx := c.Request().Context()
 	logger := c.Logger()
@@ -205,6 +205,12 @@ func resetPasswordHandler(c echo.Context, whitelist server.Whitelist, db server.
 	_, err = whitelist.DelResetPasswordTokenByUserID(userId)
 	if err != nil {
 		logger.Error("Failed to remove reset-password token from whitelist: " + err.Error())
+	}
+
+	// Unlock the account, if locked
+	err = loginBlacklist.ResetFailedLoginCountByUserID(userId)
+	if err != nil {
+		logger.Error("Failed to reset the 'failed login' counter for the user ID: " + userId)
 	}
 
 	return c.String(http.StatusOK, "Password changed successfully!")
