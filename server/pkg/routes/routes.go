@@ -118,6 +118,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	apiEndpoint := e.Group("/api", allowAllUsers)
 
 	// API endpoints (TODO: Add endpoints here!)
+	apiEndpoint.GET("/profile", profile)
 	apiEndpoint.GET("/users", handleGetUsers)
 }
 
