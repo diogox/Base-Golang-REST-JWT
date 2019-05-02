@@ -75,6 +75,7 @@ func main() {
 			EmailPassword: app.EmailPassword,
 
 			// Account Configs
+			RemoveUnverifiedAccountAfterNDays:    app.RemoveUnverifiedAccountAfterNDays,
 			AccountAllowedNOfFailedLoginAttempts: app.AccountAllowedNOfFailedLoginAttempts,
 			AccountLockDuration:                  app.AccountLockDuration,
 		}

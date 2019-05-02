@@ -100,7 +100,8 @@ func registerHandler(c echo.Context, db server.DB, emailService server.EmailServ
 	}
 
 	// Make the account self-delete, if it's not verified within 30 days
-	jobrunner.In(30*(24*time.Hour), accounts.NewRemoveIfUnverifiedAccountJob(logger, db, newUser.ID))
+	removeIn := time.Duration(removeUnverifiedAccountAfterNDays)*(24*time.Hour)
+	jobrunner.In(removeIn, accounts.NewRemoveIfUnverifiedAccountJob(logger, db, newUser.ID))
 
 	// Return Successful Response
 	return c.JSON(http.StatusCreated, models.User{

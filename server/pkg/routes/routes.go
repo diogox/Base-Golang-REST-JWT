@@ -21,14 +21,15 @@ var (
 	refreshTokenDurationInMinutes int
 
 	// Databases
-	db                            server.DB
-	tokenWhitelist                server.Whitelist
-	loginBlacklist                server.Blacklist
+	db             server.DB
+	tokenWhitelist server.Whitelist
+	loginBlacklist server.Blacklist
 
 	// Email Service
-	emailService                  server.EmailService
+	emailService server.EmailService
 
 	// Account Configs
+	removeUnverifiedAccountAfterNDays    int
 	accountAllowedNOfFailedLoginAttempts int
 	accountLockDuration                  int
 )
@@ -52,6 +53,7 @@ type RouteOptions struct {
 	EmailPassword string
 
 	// Account Configs
+	RemoveUnverifiedAccountAfterNDays    int
 	AccountAllowedNOfFailedLoginAttempts int
 	AccountLockDuration                  int
 }
@@ -87,6 +89,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	jwtSecret = opts.JWTSecret
 	authTokenDurationInMinutes = opts.AuthTokenDurationInMinutes
 	refreshTokenDurationInMinutes = opts.RefreshTokenDurationInMinutes
+	removeUnverifiedAccountAfterNDays = opts.RemoveUnverifiedAccountAfterNDays
 	accountAllowedNOfFailedLoginAttempts = opts.AccountAllowedNOfFailedLoginAttempts
 	accountLockDuration = opts.AccountLockDuration
 

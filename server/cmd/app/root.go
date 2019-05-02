@@ -25,6 +25,7 @@ const (
 	EmailPasswordEnv = "EMAIL_PASSWORD"
 
 	// Accounts Config
+	RemoveUnverifiedAccountAfterNDaysEnv    = "REMOVE_UNVERIFIED_ACCOUNT_AFTER_N_DAYS"
 	AccountAllowedNOfFailedLoginAttemptsEnv = "ACCOUNT_ALLOWED_N_OF_FAILED_LOGIN_ATTEMPTS"
 	AccountLockDurationEnv                  = "ACCOUNT_LOCK_DURATION_IN_MINUTES"
 )
@@ -49,6 +50,7 @@ var (
 	EmailPassword string
 
 	// Accounts Config
+	RemoveUnverifiedAccountAfterNDays    int
 	AccountAllowedNOfFailedLoginAttempts int
 	AccountLockDuration                  int
 )
@@ -82,6 +84,7 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&EmailPassword, "email-password", "", viper.GetString(EmailPasswordEnv), "Set the email service's password")
 
 	/* Accounts Config */
+	Cmd.PersistentFlags().IntVarP(&RemoveUnverifiedAccountAfterNDays, "remove-unverified-after-days", "", viper.GetInt(RemoveUnverifiedAccountAfterNDaysEnv), "Set the number of days until an unverified account gets removed")
 	Cmd.PersistentFlags().IntVarP(&AccountAllowedNOfFailedLoginAttempts, "failed-login-attempts", "", viper.GetInt(AccountAllowedNOfFailedLoginAttemptsEnv), "Set the number of failed-login attempts a user can make before the account is locked")
 	Cmd.PersistentFlags().IntVarP(&AccountLockDuration, "account-lock-duration", "", viper.GetInt(AccountLockDurationEnv), "Set the number of minutes an account stays locked for")
 }
