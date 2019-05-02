@@ -88,6 +88,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	authTokenDurationInMinutes = opts.AuthTokenDurationInMinutes
 	refreshTokenDurationInMinutes = opts.RefreshTokenDurationInMinutes
 	accountAllowedNOfFailedLoginAttempts = opts.AccountAllowedNOfFailedLoginAttempts
+	accountLockDuration = opts.AccountLockDuration
 
 	e.Validator = newValidator()
 

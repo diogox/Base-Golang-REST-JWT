@@ -3,6 +3,7 @@ package mocks
 import (
 	"github.com/pkg/errors"
 	"strconv"
+	"time"
 )
 
 const failedLoginPrefix = "failed_login:"
@@ -18,16 +19,16 @@ type Blacklist struct {
 }
 
 // Failed Login Blacklist
-func (im *Blacklist) GetFailedLoginCountByUserID(userID string) (string, error) {
+func (im *Blacklist) GetFailedLoginCountByUserID(userID string) (string, *time.Duration, error) {
 	key := failedLoginPrefix + userID
 
 	for _key, _value := range im.items {
 		if _key == key {
-			return _value, nil
+			return _value, nil, nil
 		}
 	}
 
-	return "", errors.New("item not found")
+	return "", nil, errors.New("item not found")
 }
 
 func (im *Blacklist) IncrementFailedLoginCountByUserID(userID string) error {

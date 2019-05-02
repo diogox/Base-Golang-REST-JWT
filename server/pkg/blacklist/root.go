@@ -26,20 +26,33 @@ type Blacklist struct {
 	accountLockDuration int
 }
 
-func (b *Blacklist) GetFailedLoginCountByUserID(userID string) (string, error) {
-	return b.client.Get(failedLoginPrefix + userID).Result()
+func (b *Blacklist) GetFailedLoginCountByUserID(userID string) (string, *time.Duration, error) {
+	key := failedLoginPrefix + userID
+
+	// Get count
+	count, err := b.client.Get(key).Result()
+	if err != nil {
+		return "", nil, err
+	}
+
+	// get time left
+	timeLeftUntilExpire, err := b.client.TTL(key).Result()
+	return count, &timeLeftUntilExpire, err
 }
 
 func (b *Blacklist) IncrementFailedLoginCountByUserID(userID string) error {
-	err := b.client.Incr(failedLoginPrefix + userID).Err()
+	key := failedLoginPrefix + userID
+
+	err := b.client.Incr(key).Err()
 	if err != nil {
 		return err
 	}
 
 	lockDuration := time.Duration(b.accountLockDuration) * time.Minute
-	return b.client.Expire(failedLoginPrefix+userID, lockDuration).Err()
+	return b.client.Expire(key, lockDuration).Err()
 }
 
 func (b *Blacklist) ResetFailedLoginCountByUserID(userID string) error {
-	return b.client.Del(failedLoginPrefix + userID).Err()
+	key := failedLoginPrefix + userID
+	return b.client.Del(key).Err()
 }

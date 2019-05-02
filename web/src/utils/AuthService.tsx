@@ -232,12 +232,13 @@ const request = (url: string, options: any) => {
         .then(response => response.json())
 };
 
-const _checkStatus = (response: Response) => {
+const _checkStatus = async (response: Response) => {
     // Raises an error in case response status is not a success
     if (response.status >= 200 && response.status < 300) { // Success status lies between 200 to 300
         return response
     } else {
-        let error = new Error(response.statusText);
+        let errorJSON = await response.json();
+        let error = new Error(errorJSON.message);
         throw error
     }
 };

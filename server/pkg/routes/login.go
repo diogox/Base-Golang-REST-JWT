@@ -1,12 +1,14 @@
 package routes
 
 import (
+	"fmt"
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
@@ -15,6 +17,11 @@ import (
 func login(c echo.Context) error {
 	return loginHandler(c, db, tokenWhitelist, loginBlacklist)
 }
+
+const incorrectCredentialsError = "Username and password don't match."
+const invalidCredentialsError = "Username and/or password not valid!"
+const emailNotVerifiedError = "Email not verified!"
+const accountLockedError = "Too many failed attempts, your account has been locked."
 
 // For testing purposes
 func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blacklist server.Blacklist) error {
@@ -42,7 +49,7 @@ func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blac
 	err = c.Validate(loginCreds)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Message: err.Error(),
+			Message: invalidCredentialsError,
 		})
 	}
 
@@ -51,46 +58,54 @@ func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blac
 	if err != nil {
 		// No user found
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: err.Error(),
+			Message: incorrectCredentialsError,
 		})
 	}
 
 	// Make sure the account hasn't been locked
-	count, err := blacklist.GetFailedLoginCountByUserID(user.ID)
+	countStr, timeUntilExpire, err := blacklist.GetFailedLoginCountByUserID(user.ID)
 	if err != nil {
 		// It probably returned an empty string, which means the value is 0.
-		count = "0"
+		countStr = "0"
 	}
 
-	if cnt, err := strconv.Atoi(count); err != nil || cnt >= accountAllowedNOfFailedLoginAttempts {
-		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: "Too many failed attempts, your account has been locked. Try again in 10 minutes!",
+	count, err := strconv.Atoi(countStr)
+	if err != nil {
+		logger.Error("Failed to assert the number of failed logins!")
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Message: "Unspecified Internal Error!",
 		})
 	}
 
 	// Check if the password matches
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginCreds.Password))
 	if err != nil {
-		// Increment 'Failed Login Attempt' counter
-		_ = blacklist.IncrementFailedLoginCountByUserID(user.ID)
 
+		// Should be locked
+		if count + 1  >= accountAllowedNOfFailedLoginAttempts {
+			msg := fmt.Sprintf("%s Try again in %.0f minutes.", accountLockedError, timeUntilExpire.Minutes())
+
+			return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Message: msg,
+			})
+		}
+
+		// Can try again...
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: err.Error(),
+			Message: handleFailedLogin(logger, blacklist, user.ID, count).Error(),
 		})
 	}
 
 	// Reset failed login counter
 	err = blacklist.ResetFailedLoginCountByUserID(user.ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Message: err.Error(),
-		})
+		logger.Error("Failed to reset 'failed-login' attempt counter!")
 	}
 
 	// Check if email is verified
 	if !user.IsEmailVerified {
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Message: "Email not verified!",
+			Message: emailNotVerifiedError,
 		})
 	}
 
@@ -141,4 +156,20 @@ func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blac
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+
+// Returns the error to be used
+func handleFailedLogin(logger echo.Logger, blacklist server.Blacklist, userID string, failedLoginCount int) error {
+	count := failedLoginCount + 1
+
+	// Increment 'Failed Login Attempt' counter
+	err := blacklist.IncrementFailedLoginCountByUserID(userID)
+	if err != nil {
+		logger.Error("Failed to increment 'failed-login' count.")
+	}
+
+	attemptsLeft := accountAllowedNOfFailedLoginAttempts - count
+	msg := fmt.Sprintf("%s You have %d tries left.", incorrectCredentialsError, attemptsLeft)
+	return errors.New(msg)
 }

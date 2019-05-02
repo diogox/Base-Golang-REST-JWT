@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"time"
 )
 
 type DB interface {
@@ -29,7 +30,7 @@ type Whitelist interface {
 
 type Blacklist interface {
 	// Failed Login Limit
-	GetFailedLoginCountByUserID(userID string) (string, error)
+	GetFailedLoginCountByUserID(userID string) (string, *time.Duration, error)
 	IncrementFailedLoginCountByUserID(userID string) error
 	ResetFailedLoginCountByUserID(userID string) error
 }
