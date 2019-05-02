@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-func NewRemoveIfUnverifiedAccountJob(logger echo.Logger, db server.SqlDB, userId string) RemoveIfUnverifiedAccountJob {
+func NewRemoveIfUnverifiedAccountJob(logger echo.Logger, db server.DB, userId string) RemoveIfUnverifiedAccountJob {
 	return RemoveIfUnverifiedAccountJob{
 		logger: logger,
 		db:     db,
@@ -16,7 +16,7 @@ func NewRemoveIfUnverifiedAccountJob(logger echo.Logger, db server.SqlDB, userId
 
 type RemoveIfUnverifiedAccountJob struct {
 	logger echo.Logger
-	db     server.SqlDB
+	db     server.DB
 	userId string
 }
 

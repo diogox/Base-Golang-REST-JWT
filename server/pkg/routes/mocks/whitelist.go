@@ -5,18 +5,18 @@ import "github.com/pkg/errors"
 const refreshTokenPrefix = "refresh:"
 const resetPasswordTokenPrefix = "reset:"
 
-func NewMockInMemoryDB() *InMemoryDB {
-	return &InMemoryDB{
+func NewWhitelist() *Whitelist {
+	return &Whitelist{
 		items: make(map[string]string, 0),
 	}
 }
 
-type InMemoryDB struct {
+type Whitelist struct {
 	items map[string]string
 }
 
 // Refresh Token
-func (im *InMemoryDB) GetRefreshTokenByUserID(key string) (string, error) {
+func (im *Whitelist) GetRefreshTokenByUserID(key string) (string, error) {
 	key = refreshTokenPrefix + key
 
 	for _key, _value := range im.items {
@@ -28,14 +28,14 @@ func (im *InMemoryDB) GetRefreshTokenByUserID(key string) (string, error) {
 	return "", errors.New("item not found")
 }
 
-func (im *InMemoryDB) SetRefreshTokenByUserID(key string, value string, valueDurationInMinutes int) error {
+func (im *Whitelist) SetRefreshTokenByUserID(key string, value string, valueDurationInMinutes int) error {
 	key = refreshTokenPrefix + key
 
 	im.items[key] = value
 	return nil
 }
 
-func (im *InMemoryDB) DelRefreshTokenByUserID(key string) (int64, error) {
+func (im *Whitelist) DelRefreshTokenByUserID(key string) (int64, error) {
 	key = refreshTokenPrefix + key
 
 	delete(im.items, key)
@@ -47,7 +47,7 @@ func (im *InMemoryDB) DelRefreshTokenByUserID(key string) (int64, error) {
 }
 
 // Reset Password Token
-func (im *InMemoryDB) GetResetPasswordTokenByUserID(key string) (string, error) {
+func (im *Whitelist) GetResetPasswordTokenByUserID(key string) (string, error) {
 	key = resetPasswordTokenPrefix + key
 
 	for _key, _value := range im.items {
@@ -59,14 +59,14 @@ func (im *InMemoryDB) GetResetPasswordTokenByUserID(key string) (string, error) 
 	return "", errors.New("item not found")
 }
 
-func (im *InMemoryDB) SetResetPasswordTokenByUserID(key string, value string, valueDurationInMinutes int) error {
+func (im *Whitelist) SetResetPasswordTokenByUserID(key string, value string, valueDurationInMinutes int) error {
 	key = resetPasswordTokenPrefix + key
 
 	im.items[key] = value
 	return nil
 }
 
-func (im *InMemoryDB) DelResetPasswordTokenByUserID(key string) (int64, error) {
+func (im *Whitelist) DelResetPasswordTokenByUserID(key string) (int64, error) {
 	key = resetPasswordTokenPrefix + key
 
 	delete(im.items, key)

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/diogox/REST-JWT/server/pkg/blacklist"
 	"net/http"
 
 	"github.com/diogox/REST-JWT/server"
@@ -14,8 +15,9 @@ import (
 
 var (
 	AppUrl                        string
-	db                            server.SqlDB
-	tokenWhitelist                server.InMemoryDB
+	db                            server.DB
+	tokenWhitelist                server.Whitelist
+	loginBlacklist                server.Blacklist
 	emailService                  server.EmailService
 	jwtSecret                     []byte
 	authTokenDurationInMinutes    int
@@ -45,14 +47,21 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	AppUrl = opts.AppUrl
 
 	// Instantiate Prisma client
-	db = server.SqlDB(database.NewPrismaDB(opts.PrismaHost))
+	db = server.DB(database.NewPrismaDB(opts.PrismaHost))
 
-	// Instantiate redis client
+	// Instantiate whitelist
 	whitelist, err := whitelist.NewWhitelist(opts.RedisHost)
 	if err != nil {
 		panic("Failed to connect to redis database: " + err.Error())
 	}
 	tokenWhitelist = whitelist
+
+	// Instantiate blacklist
+	blacklist, err := blacklist.NewBlacklist(opts.RedisHost)
+	if err != nil {
+		panic("Failed to connect to redis database: " + err.Error())
+	}
+	loginBlacklist = blacklist
 
 	// Instantiate email client
 	emailOpts := email.EmailClientOptions{

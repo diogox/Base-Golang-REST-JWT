@@ -45,7 +45,7 @@ func TestRefresh(t *testing.T) {
 
 			// Create mock db
 			db := mocks.NewMockDb()
-			memoryDB := mocks.NewMockInMemoryDB()
+			memoryDB := mocks.NewWhitelist()
 
 			newUser, _ := db.CreateUser(context.Background(), &auth.NewRegistration{
 				Email: "",

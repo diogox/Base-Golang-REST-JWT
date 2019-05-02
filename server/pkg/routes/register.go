@@ -20,7 +20,7 @@ func register(c echo.Context) error {
 }
 
 // For testing purposes
-func registerHandler(c echo.Context, db server.SqlDB, emailService server.EmailService) error {
+func registerHandler(c echo.Context, db server.DB, emailService server.EmailService) error {
 	// Get context
 	ctx := c.Request().Context()
 

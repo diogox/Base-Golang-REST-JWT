@@ -15,7 +15,7 @@ func refreshToken(c echo.Context) error {
 	return refreshTokenHandler(c, db, tokenWhitelist)
 }
 
-func refreshTokenHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) error {
+func refreshTokenHandler(c echo.Context, db server.DB, whitelist server.Whitelist) error {
 
 	// Get logger
 	logger := c.Logger()

@@ -27,7 +27,7 @@ func TestLogout(t *testing.T) {
 		e := SetupTestServer()
 
 		// Create mock db
-		memoryDB := mocks.NewMockInMemoryDB()
+		memoryDB := mocks.NewWhitelist()
 
 		// Marshal credentials
 		var r struct {

@@ -1,26 +1,23 @@
 package routes
 
 import (
-	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
-	"net/http"
-
 	"github.com/diogox/REST-JWT/server"
 	"github.com/diogox/REST-JWT/server/pkg/models"
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
+	"github.com/diogox/REST-JWT/server/pkg/routes/custom_middleware/authentication"
 	"github.com/diogox/REST-JWT/server/pkg/token"
 	"github.com/labstack/echo"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
+	"strconv"
 )
 
-// TODO: Need to check refresh token whitelist for previous entries for a given user, if it exists,
-//  remove it and return new refresh token.
-
 func login(c echo.Context) error {
-	return loginHandler(c, db, tokenWhitelist)
+	return loginHandler(c, db, tokenWhitelist, loginBlacklist)
 }
 
 // For testing purposes
-func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) error {
+func loginHandler(c echo.Context, db server.DB, whitelist server.Whitelist, blacklist server.Blacklist) error {
 	// The previous auth token doesn't get invalidated, we just have to rely on the short duration of each token.
 	// New logins invalidate the previous refresh_token. Logouts do the same.
 
@@ -52,17 +49,40 @@ func loginHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB) 
 	// Get user
 	user, err := db.GetUserByUsername(ctx, loginCreds.Username)
 	if err != nil {
-		// TODO: Maybe it's more helpful to specify that the username doesn't exist?
 		// No user found
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
 
+	// Make sure the account hasn't been locked
+	count, err := blacklist.GetFailedLoginCountByUserID(user.ID)
+	if err != nil {
+		// It probably returned an empty string, which means the value is 0.
+		count = "0"
+	}
+
+	if cnt, err := strconv.Atoi(count); err != nil || cnt >= 5 {
+		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: "Too many failed attempts, your account has been locked. Try again in 10 minutes!",
+		})
+	}
+
 	// Check if the password matches
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginCreds.Password))
 	if err != nil {
+		// Increment 'Failed Login Attempt' counter
+		_ = blacklist.IncrementFailedLoginCountByUserID(user.ID)
+
 		return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	// Reset failed login counter
+	err = blacklist.ResetFailedLoginCountByUserID(user.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Message: err.Error(),
 		})
 	}

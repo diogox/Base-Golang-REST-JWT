@@ -13,7 +13,7 @@ func logout(c echo.Context) error {
 }
 
 // Invalidates the previous refresh_token
-func logoutHandler(c echo.Context, whitelist server.InMemoryDB) error {
+func logoutHandler(c echo.Context, whitelist server.Whitelist) error {
 
 	// Get logger
 	logger := c.Logger()

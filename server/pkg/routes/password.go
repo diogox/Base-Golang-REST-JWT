@@ -15,7 +15,7 @@ func sendPasswordResetEmail(c echo.Context) error {
 	return sendPasswordResetEmailHandler(c, db, tokenWhitelist, emailService)
 }
 
-func sendPasswordResetEmailHandler(c echo.Context, db server.SqlDB, whitelist server.InMemoryDB, emailService server.EmailService) error {
+func sendPasswordResetEmailHandler(c echo.Context, db server.DB, whitelist server.Whitelist, emailService server.EmailService) error {
 	// Get context
 	ctx := c.Request().Context()
 
@@ -110,7 +110,7 @@ func resetPassword(c echo.Context) error {
 	return resetPasswordHandler(c, tokenWhitelist, db)
 }
 
-func resetPasswordHandler(c echo.Context, whitelist server.InMemoryDB, db server.SqlDB) error {
+func resetPasswordHandler(c echo.Context, whitelist server.Whitelist, db server.DB) error {
 	// Get context
 	ctx := c.Request().Context()
 	logger := c.Logger()

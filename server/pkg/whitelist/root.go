@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-const refreshTokenPrefix = "refresh:"
-const resetPasswordTokenPrefix = "reset:"
+const refreshTokenPrefix = "whitelist:refresh:"
+const resetPasswordTokenPrefix = "whitelist:reset:"
 
 func NewWhitelist(host string) (*Whitelist, error) {
 	client := redis.NewClient(&redis.Options{

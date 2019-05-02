@@ -6,7 +6,7 @@ import (
 	"github.com/diogox/REST-JWT/server/pkg/models/auth"
 )
 
-type SqlDB interface {
+type DB interface {
 	GetUserByID(ctx context.Context, userId string) (*models.User, error)
 	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, userEmail string) (*models.User, error)
@@ -15,14 +15,21 @@ type SqlDB interface {
 	DeleteUserByID(ctx context.Context, userID string) (*models.User, error)
 }
 
-type InMemoryDB interface {
+type Whitelist interface {
 	// Refresh Token
-	GetRefreshTokenByUserID(key string) (string, error)
-	SetRefreshTokenByUserID(key string, value string, valueDurationInMinutes int) error
-	DelRefreshTokenByUserID(key string) (int64, error)
+	GetRefreshTokenByUserID(userID string) (string, error)
+	SetRefreshTokenByUserID(userID string, value string, valueDurationInMinutes int) error
+	DelRefreshTokenByUserID(userID string) (int64, error)
 
 	// Reset Password Token
-	GetResetPasswordTokenByUserID(key string) (string, error)
-	SetResetPasswordTokenByUserID(key string, value string, valueDurationInMinutes int) error
-	DelResetPasswordTokenByUserID(key string) (int64, error)
+	GetResetPasswordTokenByUserID(userID string) (string, error)
+	SetResetPasswordTokenByUserID(userID string, value string, valueDurationInMinutes int) error
+	DelResetPasswordTokenByUserID(userID string) (int64, error)
+}
+
+type Blacklist interface {
+	// Failed Login Limit
+	GetFailedLoginCountByUserID(userID string) (string, error)
+	IncrementFailedLoginCountByUserID(userID string) error
+	ResetFailedLoginCountByUserID(userID string) error
 }

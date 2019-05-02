@@ -116,7 +116,7 @@ func TestLogin(t *testing.T) {
 			c := e.NewContext(req, rec)
 
 			// Assertions
-			assert.Equal(t, loginHandler(c, db, mocks.NewMockInMemoryDB()), nil)
+			assert.Equal(t, loginHandler(c, db, mocks.NewWhitelist(), mocks.NewBlacklist()), nil)
 			assert.Equal(t, rec.Code, tc.expectedStatusCode)
 		})
 	}
