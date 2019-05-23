@@ -4,7 +4,7 @@ services:
     image: prismagraphql/prisma:1.30
     restart: always
     ports:
-    - "4467:4467"
+      - "4467:4467"
     environment:
       PRISMA_CONFIG: |
         port: 4467
@@ -46,7 +46,8 @@ services:
     environment:
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_DURATION=${JWT_DURATION}
+      - JWT_AUTH_DURATION=${JWT_AUTH_DURATION}
+      - JWT_REFRESH_DURATION=${JWT_REFRESH_DURATION}
       - PRISMA_HOST=prisma
       - REDIS_HOST=redis
       - EMAIL=${EMAIL}
