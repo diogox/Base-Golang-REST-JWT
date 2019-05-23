@@ -1,0 +1,78 @@
+<div class="container card">
+  <div class="card-body">
+    <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+      <div class="card-title">
+        <h2><b>Login</b></h2>
+      </div>
+
+      <div class="login-fields">
+        <!-- Username field -->
+        <div class="form-group">
+          <input required
+                 minlength="3"
+                 pattern="^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$"
+                 ngModel
+                 name="username"
+                 #username="ngModel"
+                 placeholder="Username"
+                 type="text"
+                 class="form-control">
+          <div *ngIf="username.touched && username.invalid"
+               class="text-danger">
+            <!-- Username not specified -->
+            <ng-container *ngIf="username.errors.required">
+              Username is required.
+            </ng-container>
+            <!-- Username not long enough -->
+            <ng-container *ngIf="username.errors.minlength">
+              Your username must have at least {{ username.errors.minlength.requiredLength }} characters.
+            </ng-container>
+            <!-- Username not valid -->
+            <ng-container *ngIf="username.errors.pattern">
+              Your username is not valid.
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+          <input required
+                 minlength="8"
+                 ngModel
+                 name="password"
+                 #password="ngModel"
+                 placeholder="Password"
+                 type="password"
+                 class="form-control">
+          <div *ngIf="password.touched && password.invalid"
+               class="text-danger">
+            <!-- Password not specified -->
+            <ng-container *ngIf="password.errors.required">
+              Password is required.
+            </ng-container>
+            <!-- Password not long enough -->
+            <ng-container *ngIf="password.errors.minlength">
+              Your password must have at least {{ password.errors.minlength.requiredLength }} characters.
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stay logged in field -->
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ngModel name="isStayLoggedIn">
+          Remember me?
+        </label>
+      </div>
+
+      <div class="login-action-area">
+        <button
+          [disabled]="!f.valid"
+          class="btn btn-primary flex-fill"
+          type="submit">Login</button>
+        <a href="#">Don't have an account?</a>
+      </div>
+    </form>
+  </div>
+</div>

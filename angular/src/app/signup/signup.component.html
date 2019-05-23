@@ -1,0 +1,108 @@
+<div class="container card">
+  <div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="card-title">
+        <h2><b>Signup</b></h2>
+      </div>
+
+      <div class="signup-fields">
+        <div *ngIf="form.errors" class="alert alert-danger">
+          Failed to signup. (TODO: get message from server)
+        </div>
+        <!-- Username field -->
+        <div class="form-group">
+          <input formControlName="username"
+                 placeholder="Username"
+                 type="text"
+                 class="form-control">
+          <div *ngIf="username.pending">Checking username availability...</div>
+          <div *ngIf="username.touched && username.invalid"
+               class="text-danger">
+            <!-- Username not specified -->
+            <ng-container *ngIf="username.errors.required">
+              Username is required.
+            </ng-container>
+            <!-- Username not long enough -->
+            <ng-container *ngIf="username.errors.minlength">
+              Your username must have at least {{ username.errors.minlength.requiredLength }} characters.
+            </ng-container>
+            <!-- Username already taken -->
+            <ng-container *ngIf="username.errors.shouldBeUniqueUsername">
+              Username is already taken.
+            </ng-container>
+            <!-- Username not valid -->
+            <ng-container *ngIf="username.errors.pattern">
+              Username not valid.
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Email field -->
+        <div class="form-group">
+          <input formControlName="email"
+                 placeholder="Email"
+                 type="text"
+                 class="form-control">
+          <div *ngIf="email.pending">Checking email availability...</div>
+          <div *ngIf="email.touched && email.invalid"
+               class="text-danger">
+            <!-- Email not specified -->
+            <ng-container *ngIf="email.errors.required">
+              Email is required.
+            </ng-container>
+            <!-- Email already taken -->
+            <ng-container *ngIf="email.errors.shouldBeUniqueEmail">
+              Email is already taken.
+            </ng-container>
+            <!-- Email not valid -->
+            <ng-container *ngIf="email.errors.email">
+              Email not valid.
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+          <input formControlName="password"
+                 placeholder="Password"
+                 type="password"
+                 class="form-control">
+          <div *ngIf="password.touched && password.invalid"
+               class="text-danger">
+            <!-- Password not specified -->
+            <ng-container *ngIf="password.errors.required">
+              Password is required.
+            </ng-container>
+            <!-- Password not long enough -->
+            <ng-container *ngIf="password.errors.minlength">
+              Passwords must have at least {{ password.errors.minlength.requiredLength }} characters.
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Password confirmation field -->
+        <div class="form-group">
+          <input formControlName="passwordConfirmation"
+                 placeholder="Confirm Password"
+                 id="passwordConfirmation"
+                 type="password"
+                 class="form-control">
+
+          <!-- Passwords don't match -->
+          <div *ngIf="passwordConfirmation.touched && passwordConfirmation.invalid"
+               class="text-danger">
+              Passwords must match.
+          </div>
+        </div>
+      </div>
+
+      <div class="signup-action-area">
+        <button
+          [disabled]="form.invalid"
+          class="btn btn-primary flex-fill"
+          type="submit">Signup</button>
+        <a href="#">Already have an account?</a>
+      </div>
+    </form>
+  </div>
+</div>
