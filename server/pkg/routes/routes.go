@@ -115,6 +115,10 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.POST("/api/auth/reset-password/:token", resetPassword)
 	e.POST("/api/auth/refresh", refreshToken) // Refreshes the JWT token
 
+	// Availability
+	e.GET("/api/availability/username/:username", availableUsername)
+	e.GET("/api/availability/email/:email", availableEmail)
+
 	// Endpoint that requires authentication
 	apiEndpoint := e.Group("/api", allowAllUsers)
 
