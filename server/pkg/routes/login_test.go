@@ -80,10 +80,7 @@ func TestLogin(t *testing.T) {
 
 	// For each test in the testing table
 	for _, tc := range loginTT {
-		t.Run(tc.name, func(t *testing.T) {
-
-			// Setup
-			e := SetupTestServer()
+		t.Run(tc.name, func(t *testing.T) {	
 
 			// Create mock db
 			db := mocks.NewMockDb()

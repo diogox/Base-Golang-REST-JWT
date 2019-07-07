@@ -97,9 +97,9 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 	e.Validator = newValidator()
 
 	// Serve website
-	e.File("/*", "./web/build/index.html")
+	e.File("/*", "../web/build/index.html")
 	//e.File("/favicon.ico", "../web/images/favicon.ico")
-	e.Static("/static", "./web/build/static")
+	e.Static("/static", "../web/build/static")
 
 	// Permissions
 	allowAllUsers := authentication.RequireAuth(jwtSecret)

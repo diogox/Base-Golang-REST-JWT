@@ -25,7 +25,7 @@ RUN npm run build
 WORKDIR ./..
 
 # Build smallest binary possible
-RUN go build -o rest-server -ldflags="-s -w" server/cmd/main.go
+RUN CGO_ENABLED=0 go build -o rest-server -ldflags="-s -w" server/cmd/main.go
 
 # Compress binary even further
 #RUN apt-get install -y upx
@@ -34,8 +34,9 @@ RUN go build -o rest-server -ldflags="-s -w" server/cmd/main.go
 # Make smaller image with just the executable
 FROM alpine
 COPY --from=build /go/src/github.com/diogox/REST-JWT/rest-server /server/rest-server
+COPY --from=build /go/src/github.com/diogox/REST-JWT/server/email_body.html /server/email_body.html
 COPY --from=build /go/src/github.com/diogox/REST-JWT/web/build /web/build/
 
 EXPOSE 8090
 
-CMD ["/server/rest-server"]
+CMD ["server/rest-server"]

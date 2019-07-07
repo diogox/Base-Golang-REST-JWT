@@ -52,7 +52,7 @@ func (ec *EmailClient) SendEmail(user models.User, opts models.NewEmail) error {
 }
 
 func getBody() (string, error) {
-	contents, err := ioutil.ReadFile("./server/pkg/email/body.html")
+	contents, err := ioutil.ReadFile("./server/email_body.html")
 	if err != nil {
 		return "", err
 	}
