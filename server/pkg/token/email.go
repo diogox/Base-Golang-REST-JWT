@@ -9,7 +9,7 @@ const EmailVerificationToken = "EMAIL_VERIFICATION_TOKEN"
 
 type EmailVerificationTokenOptions struct {
 	JWTSecret         []byte
-	UserId          string
+	UserId            string
 	DurationInMinutes int
 }
 
@@ -32,4 +32,3 @@ func NewEmailVerificationToken(opts EmailVerificationTokenOptions) (string, erro
 
 	return signedToken, nil
 }
-

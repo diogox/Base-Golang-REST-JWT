@@ -18,6 +18,7 @@ const (
 	RedisHostEnv  = "REDIS_HOST"
 
 	// Email Service Config
+	EmailBodyPathEnv = "EMAIL_BODY_PATH"
 	EmailEnv         = "EMAIL"
 	EmailHostEnv     = "EMAIL_HOST"
 	EmailPortEnv     = "EMAIL_PORT"
@@ -43,6 +44,7 @@ var (
 	RedisHost  string
 
 	// Email Service Config
+	EmailBodyPath string
 	Email         string
 	EmailHost     string
 	EmailPort     int
@@ -77,7 +79,8 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&RedisHost, "redis", "", viper.GetString(RedisHostEnv), "Set the Host name for the redis database.")
 
 	/* Email Service Configuration */
-	Cmd.PersistentFlags().StringVarP(&Email, "email", "", viper.GetString(EmailEnv), "Set the email to e used")
+	Cmd.PersistentFlags().StringVarP(&EmailBodyPath, "email-body", "", viper.GetString(EmailBodyPathEnv), "Set the email html to be used")
+	Cmd.PersistentFlags().StringVarP(&Email, "email", "", viper.GetString(EmailEnv), "Set the email to be used")
 	Cmd.PersistentFlags().StringVarP(&EmailHost, "email-host", "", viper.GetString(EmailHostEnv), "Set the email service's host")
 	Cmd.PersistentFlags().IntVarP(&EmailPort, "email-port", "", viper.GetInt(EmailPortEnv), "Set the email service's port")
 	Cmd.PersistentFlags().StringVarP(&EmailUsername, "email-username", "", viper.GetString(EmailUsernameEnv), "Set the email service's username")

@@ -18,6 +18,7 @@ func NewEmailClient(from string, opts EmailClientOptions) *EmailClient {
 }
 
 type EmailClient struct {
+	BodyPath string
 	From     string
 	Host     string
 	Port     int
@@ -34,7 +35,7 @@ func (ec *EmailClient) SendEmail(user models.User, opts models.NewEmail) error {
 	m.SetHeader("Subject", opts.Subject)
 
 	// Set email body
-	emailBody, err := getBody()
+	emailBody, err := ec.getBody()
 	if err != nil {
 		return err
 	}
@@ -51,8 +52,8 @@ func (ec *EmailClient) SendEmail(user models.User, opts models.NewEmail) error {
 	return nil
 }
 
-func getBody() (string, error) {
-	contents, err := ioutil.ReadFile("./server/email_body.html")
+func (ec *EmailClient) getBody() (string, error) {
+	contents, err := ioutil.ReadFile(ec.BodyPath)
 	if err != nil {
 		return "", err
 	}

@@ -50,6 +50,7 @@ services:
       - JWT_REFRESH_DURATION=${JWT_REFRESH_DURATION}
       - PRISMA_HOST=prisma
       - REDIS_HOST=redis
+      - EMAIL_BODY_PATH=/go/src/github.com/diogox/REST-JWT/server/email_body.html
       - EMAIL=${EMAIL}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}

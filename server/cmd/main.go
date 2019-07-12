@@ -68,6 +68,7 @@ func main() {
 			RedisHost:  app.RedisHost,
 
 			// Email Service Configs
+			EmailBodyPath: app.EmailBodyPath,
 			Email:         app.Email,
 			EmailHost:     app.EmailHost,
 			EmailPort:     app.EmailPort,

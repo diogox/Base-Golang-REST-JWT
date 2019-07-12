@@ -47,6 +47,7 @@ type RouteOptions struct {
 	RedisHost  string
 
 	// Email Service Configs
+	EmailBodyPath string
 	Email         string
 	EmailHost     string
 	EmailPort     int
@@ -79,6 +80,7 @@ func SetupRoutes(e *echo.Echo, opts RouteOptions) {
 
 	// Instantiate email client
 	emailOpts := email.EmailClientOptions{
+		BodyPath: opts.EmailBodyPath,
 		Host:     opts.EmailHost,
 		Port:     opts.EmailPort,
 		Username: opts.EmailUsername,
